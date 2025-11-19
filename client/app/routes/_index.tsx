@@ -28,8 +28,8 @@ export async function loader({ context }: LoaderFunctionArgs) {
     let resSettings: any = null;
     if (apiBinding?.fetch) {
       console.log("[loader] Using API binding");
-      res = await apiBinding.fetch(new Request("/api/universities")).catch(() => null as any);
-      resSettings = await apiBinding.fetch(new Request("/api/settings/public")).catch(() => null as any);
+      res = await apiBinding.fetch(new Request("https://api.local/api/universities")).catch(() => null as any);
+      resSettings = await apiBinding.fetch(new Request("https://api.local/api/settings/public")).catch(() => null as any);
     } else {
       console.log("[loader] Using fallback fetch");
       const apiUrlRaw = (context as any)?.env?.API_URL as any;

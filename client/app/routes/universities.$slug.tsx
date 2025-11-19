@@ -24,7 +24,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
   const envApi = typeof apiUrlRaw === 'string' && apiUrlRaw ? apiUrlRaw : undefined;
   let res: any = null;
   if (apiBinding?.fetch) {
-    res = await apiBinding.fetch(new Request(`/api/universities/${slug}`)).catch(() => null as any);
+    res = await apiBinding.fetch(new Request(`https://api.local/api/universities/${slug}`)).catch(() => null as any);
   } else {
     const bases = [
       ...(envApi ? [envApi] : []),
