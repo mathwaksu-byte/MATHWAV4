@@ -23,7 +23,7 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
   const envApi = (context as any)?.env?.API_URL as string | undefined;
   let res: any = null;
   if (apiBinding?.fetch) {
-    res = await apiBinding.fetch(`http://api/api/universities/${slug}`).catch(() => null as any);
+    res = await apiBinding.fetch(new Request(`/api/universities/${slug}`)).catch(() => null as any);
   } else {
     const bases = [
       ...(envApi ? [envApi] : []),

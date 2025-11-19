@@ -29,7 +29,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
         upForm.append('file', f);
         upForm.append('bucket', 'uploads');
         upForm.append('folder', 'leads/marksheets');
-        const r = await apiBinding.fetch('http://api/api/uploads/single', { method: 'POST', body: upForm } as any);
+        const r = await apiBinding.fetch(new Request("/api/uploads/single", { method: 'POST', body: upForm as any }));
         if (r && (r as Response).ok) {
           const j = await (r as Response).json();
           return (j as any)?.file?.url as string | undefined;
@@ -67,11 +67,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
     };
     if (apiBinding?.fetch) {
       try {
-        const r = await apiBinding.fetch('http://api/api/applications', {
+        const r = await apiBinding.fetch(new Request("/api/applications", {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
-        } as any);
+        }));
         if ((r as Response) && (r as Response).ok) {
           const j = await (r as Response).json().catch(() => ({}));
           if ((j as any)?.saved) {
