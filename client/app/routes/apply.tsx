@@ -56,14 +56,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
   try {
     const marksheetUrl = await uploadMarksheet();
     const payload = {
-      full_name: String(fd.get('name') || ''),
       name: String(fd.get('name') || ''),
       email: fd.get('email') ? String(fd.get('email')) : undefined,
       phone: String(fd.get('phone') || ''),
       city: String(fd.get('city') || ''),
       neet_qualified: String(!!fd.get('neet_qualified')),
       preferred_university_slug: fd.get('preferred_university_slug') ? String(fd.get('preferred_university_slug')) : undefined,
-      preferred_year: fd.get('preferred_year') ? parseInt(String(fd.get('preferred_year')), 10) : undefined,
       marksheet_url: marksheetUrl
     };
     if (apiBinding?.fetch) {
@@ -75,7 +73,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
         }));
         if ((r as Response) && (r as Response).ok) {
           const j = await (r as Response).json().catch(() => ({}));
-          if ((j as any)?.saved) {
+          if ((j as any)?.saved || (j as any)?.application) {
             return { ok: true } as ActionData;
           }
         }
@@ -90,7 +88,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           });
           if (r && r.ok) {
             const j = await r.json().catch(() => ({}));
-            if ((j as any)?.saved) {
+            if ((j as any)?.saved || (j as any)?.application) {
               return { ok: true } as ActionData;
             }
           }
