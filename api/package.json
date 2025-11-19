@@ -1,0 +1,38 @@
+{
+  "name": "mathwa-api",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev:node",
+    "dev:node": "node ./src/index.js",
+    "dev:wrangler": "wrangler dev",
+    "start": "node ./src/index.js",
+    "build": "tsc -b",
+    "preview": "wrangler dev --persist-to ./tmp",
+    "postinstall": ""
+  },
+  "dependencies": {
+    "@prisma/client": "^5.19.1",
+    "@supabase/supabase-js": "^2.47.10",
+    "axios": "^1.13.2",
+    "bcrypt": "^6.0.0",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "express-validator": "^7.3.0",
+    "helmet": "^8.1.0",
+    "hono": "^4.6.8",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "uuid": "^13.0.0",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "prisma": "^5.19.1",
+    "typescript": "^5.6.2",
+    "wrangler": "^4.49.0"
+  }
+}
