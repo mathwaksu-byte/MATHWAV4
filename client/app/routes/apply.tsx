@@ -148,7 +148,7 @@ export default function Apply() {
                 required
                 placeholder="ex: +91 98765 43210"
                 inputMode="tel"
-                pattern="^[+0-9\s-]{10,}$"
+                pattern="^[-+0-9 ]{10,}$"
                 value={phoneMasked}
                 onChange={(e) => setPhone(e.currentTarget.value)}
                 className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-royalBlue"
