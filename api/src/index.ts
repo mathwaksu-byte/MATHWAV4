@@ -25,7 +25,7 @@ app.get('/api/universities/:slug', async c => {
   const university = await prisma.university.findUnique({ where: { slug } });
   if (!university || !university.active) return c.json({ error: 'University not found' }, 404);
   const feeRows = await prisma.fee.findMany({ where: { university_id: university.id }, orderBy: { year: 'asc' } });
-  const fees = feeRows.map(r => ({ year: r.year, tuition: Number(r.tuition), hostel: Number(r.hostel), misc: Number(r.misc), currency: r.currency }));
+  const fees = feeRows.map((r: any) => ({ year: r.year, tuition: Number(r.tuition), hostel: Number(r.hostel), misc: Number(r.misc), currency: r.currency }));
   return c.json({ university, fees });
 });
 
