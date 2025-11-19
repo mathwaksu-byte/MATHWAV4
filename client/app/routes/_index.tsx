@@ -27,9 +27,11 @@ export async function loader({ context }: LoaderFunctionArgs) {
     let res: any = null;
     let resSettings: any = null;
     if (apiBinding?.fetch) {
-      res = await apiBinding.fetch("http://api/api/universities").catch(() => null as any);
-      resSettings = await apiBinding.fetch("http://api/api/settings/public").catch(() => null as any);
+      console.log("[loader] Using API binding");
+      res = await apiBinding.fetch(new Request("/api/universities")).catch(() => null as any);
+      resSettings = await apiBinding.fetch(new Request("/api/settings/public")).catch(() => null as any);
     } else {
+      console.log("[loader] Using fallback fetch");
       const envApi = (context as any)?.env?.API_URL as string | undefined;
       const bases = [
         ...(envApi ? [envApi] : []),
@@ -38,20 +40,31 @@ export async function loader({ context }: LoaderFunctionArgs) {
         "http://127.0.0.1:8787"
       ];
       for (const b of bases) {
+        console.log(`[loader] Trying fallback: ${b}/api/universities`);
         res = await fetch(`${b}/api/universities`).catch(() => null as any);
-        if (res && res.ok) break;
+        if (res && res.ok) {
+          console.log("[loader] Fallback universities fetch succeeded");
+          break;
+        }
       }
       for (const b of bases) {
+        console.log(`[loader] Trying fallback: ${b}/api/settings/public`);
         resSettings = await fetch(`${b}/api/settings/public`).catch(() => null as any);
-        if (resSettings && resSettings.ok) break;
+        if (resSettings && resSettings.ok) {
+          console.log("[loader] Fallback settings fetch succeeded");
+          break;
+        }
       }
     }
     let list: University[] = [];
     let featured: FeaturedUniversity | null = null;
     if (res && res.ok) {
       const data = await res.json();
+      console.log("[loader] Universities data:", data);
       list = (data?.universities ?? []) as University[];
       featured = list[0] ?? null;
+    } else {
+      console.log("[loader] No universities data received");
     }
     let settings: any = {
       hero_title: "Study MBBS Abroad with Confidence",
@@ -62,10 +75,14 @@ export async function loader({ context }: LoaderFunctionArgs) {
     };
     if (resSettings && resSettings.ok) {
       const sj = await resSettings.json();
+      console.log("[loader] Settings data:", sj);
       settings = sj?.settings ?? settings;
+    } else {
+      console.log("[loader] No settings data received");
     }
     return { featured, universities: list, settings } as { featured: FeaturedUniversity | null; universities: University[]; settings: any };
-  } catch {
+  } catch (err) {
+    console.error("[loader] Error in loader:", err);
     return {
       featured: null,
       universities: [],
