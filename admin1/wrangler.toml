@@ -6,4 +6,4 @@ compatibility_date = "2025-11-18"
 [vars]
 SUPABASE_URL = "https://aajnykxpckkzedbhzsip.supabase.co"
 SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFham55a3hwY2tremVkYmh6c2lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI3OTQwOTIsImV4cCI6MjA3ODM3MDA5Mn0.GC3l_tPfTCmgGIM-SxjkFATFh4naIWV-oepYh6Ih1jY"
-API_URL = "https://YOUR_API_WORKER_DOMAIN"
+API_URL = "https://api.mathwaksu.workers.dev"
