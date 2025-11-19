@@ -3,7 +3,7 @@ import { getPrisma } from './prisma';
 import { createClient } from '@supabase/supabase-js';
 
 type Bindings = {
-  PRISMA_ACCELERATE_URL?: string;
+  SUPABASE_DB_SESSION_POOLER_URL?: string;
   SUPABASE_URL?: string;
   SUPABASE_ANON_KEY?: string;
   SUPABASE_SERVICE_KEY?: string;
