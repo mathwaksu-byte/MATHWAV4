@@ -20,7 +20,8 @@ type University = {
 export async function loader({ params, context }: LoaderFunctionArgs) {
   const slug = params.slug ?? '';
   const apiBinding = (context as any)?.env?.API as any;
-  const envApi = (context as any)?.env?.API_URL as string | undefined;
+  const apiUrlRaw = (context as any)?.env?.API_URL as any;
+  const envApi = typeof apiUrlRaw === 'string' && apiUrlRaw ? apiUrlRaw : undefined;
   let res: any = null;
   if (apiBinding?.fetch) {
     res = await apiBinding.fetch(new Request(`/api/universities/${slug}`)).catch(() => null as any);

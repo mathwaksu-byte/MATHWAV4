@@ -32,7 +32,8 @@ export async function loader({ context }: LoaderFunctionArgs) {
       resSettings = await apiBinding.fetch(new Request("/api/settings/public")).catch(() => null as any);
     } else {
       console.log("[loader] Using fallback fetch");
-      const envApi = (context as any)?.env?.API_URL as string | undefined;
+      const apiUrlRaw = (context as any)?.env?.API_URL as any;
+      const envApi = typeof apiUrlRaw === 'string' && apiUrlRaw ? apiUrlRaw : undefined;
       const bases = [
         ...(envApi ? [envApi] : []),
         "http://127.0.0.1:3001",
