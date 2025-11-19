@@ -46,7 +46,7 @@ app.post('/api/applications', async c => {
       status: 'pending'
     }
   });
-  return c.json({ application: lead, message: 'Application submitted successfully' }, 201);
+  return c.json({ saved: true, application: lead, message: 'Application submitted successfully' }, 201);
 });
 
 app.all('*', c => c.json({ error: 'Route not found' }, 404));
