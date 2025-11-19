@@ -58,10 +58,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           body: JSON.stringify(payload)
         });
         if (r && r.ok) {
-          const j = await r.json().catch(() => ({}));
-          if ((j as any)?.saved) {
-            return { ok: true } as ActionData;
-          }
+          return { ok: true } as ActionData;
         }
       } catch (e) { void e }
     }
