@@ -19,17 +19,22 @@ type University = {
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
   const slug = params.slug ?? '';
+  const apiBinding = (context as any)?.env?.API as any;
   const envApi = (context as any)?.env?.API_URL as string | undefined;
-  const bases = [
-    ...(envApi ? [envApi] : []),
-    'http://127.0.0.1:3001',
-    'http://localhost:3001',
-    'http://127.0.0.1:8787'
-  ];
   let res: any = null;
-  for (const b of bases) {
-    res = await fetch(`${b}/api/universities/${slug}`).catch(() => null as any);
-    if (res && res.ok) break;
+  if (apiBinding?.fetch) {
+    res = await apiBinding.fetch(`http://api/api/universities/${slug}`).catch(() => null as any);
+  } else {
+    const bases = [
+      ...(envApi ? [envApi] : []),
+      'http://127.0.0.1:3001',
+      'http://localhost:3001',
+      'http://127.0.0.1:8787'
+    ];
+    for (const b of bases) {
+      res = await fetch(`${b}/api/universities/${slug}`).catch(() => null as any);
+      if (res && res.ok) break;
+    }
   }
   if (!res || !res.ok) {
     throw new Response('University not found', { status: 404 });

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npx wrangler pages dev ./build/client --port 8788",
+    "dev:vite": "remix vite:dev",
     "build": "remix vite:build",
     "preview": "wrangler pages dev ./build/client --persist-to ./tmp --port 8788",
     "postinstall": ""

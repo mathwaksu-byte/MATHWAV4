@@ -12,6 +12,7 @@ export const meta: MetaFunction = () => ([
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const fd = await request.formData();
+  const apiBinding = (context as any)?.env?.API as any;
   const envApi = ((context as any)?.env?.API_URL as string | undefined);
   const bases = [
     ...(envApi ? [envApi] : []),
@@ -22,18 +23,32 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const uploadMarksheet = async () => {
     const f = fd.get('marksheet') as File | null;
     if (!f || !f.size) return undefined as string | undefined;
-    for (const b of bases) {
+    if (apiBinding?.fetch) {
       try {
         const upForm = new FormData();
         upForm.append('file', f);
         upForm.append('bucket', 'uploads');
         upForm.append('folder', 'leads/marksheets');
-        const r = await fetch(`${b}/api/uploads/single`, { method: 'POST', body: upForm });
-        if (r.ok) {
-          const j = await r.json();
+        const r = await apiBinding.fetch('http://api/api/uploads/single', { method: 'POST', body: upForm } as any);
+        if (r && (r as Response).ok) {
+          const j = await (r as Response).json();
           return (j as any)?.file?.url as string | undefined;
         }
       } catch (e) { void e }
+    } else {
+      for (const b of bases) {
+        try {
+          const upForm = new FormData();
+          upForm.append('file', f);
+          upForm.append('bucket', 'uploads');
+          upForm.append('folder', 'leads/marksheets');
+          const r = await fetch(`${b}/api/uploads/single`, { method: 'POST', body: upForm });
+          if (r.ok) {
+            const j = await r.json();
+            return (j as any)?.file?.url as string | undefined;
+          }
+        } catch (e) { void e }
+      }
     }
     return undefined as string | undefined;
   };
@@ -50,17 +65,36 @@ export async function action({ request, context }: ActionFunctionArgs) {
       preferred_year: fd.get('preferred_year') ? parseInt(String(fd.get('preferred_year')), 10) : undefined,
       marksheet_url: marksheetUrl
     };
-    for (const b of bases) {
+    if (apiBinding?.fetch) {
       try {
-        const r = await fetch(`${b}/api/applications`, {
+        const r = await apiBinding.fetch('http://api/api/applications', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
-        });
-        if (r && r.ok) {
-          return { ok: true } as ActionData;
+        } as any);
+        if ((r as Response) && (r as Response).ok) {
+          const j = await (r as Response).json().catch(() => ({}));
+          if ((j as any)?.saved) {
+            return { ok: true } as ActionData;
+          }
         }
       } catch (e) { void e }
+    } else {
+      for (const b of bases) {
+        try {
+          const r = await fetch(`${b}/api/applications`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (r && r.ok) {
+            const j = await r.json().catch(() => ({}));
+            if ((j as any)?.saved) {
+              return { ok: true } as ActionData;
+            }
+          }
+        } catch (e) { void e }
+      }
     }
     return { ok: false, message: 'Failed to submit application' } as ActionData;
   } catch {
@@ -148,7 +182,7 @@ export default function Apply() {
                 required
                 placeholder="ex: +91 98765 43210"
                 inputMode="tel"
-                pattern="^[-+0-9 ]{10,}$"
+                pattern="^[+0-9\s-]{10,}$"
                 value={phoneMasked}
                 onChange={(e) => setPhone(e.currentTarget.value)}
                 className="mt-1 border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-royalBlue"

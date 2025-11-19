@@ -23,22 +23,28 @@ type University = FeaturedUniversity;
 
 export async function loader({ context }: LoaderFunctionArgs) {
   try {
-    const envApi = (context as any)?.env?.API_URL as string | undefined;
-    const bases = [
-      ...(envApi ? [envApi] : []),
-      "http://127.0.0.1:3001",
-      "http://localhost:3001",
-      "http://127.0.0.1:8787"
-    ];
+    const apiBinding = (context as any)?.env?.API as any;
     let res: any = null;
-    for (const b of bases) {
-      res = await fetch(`${b}/api/universities`).catch(() => null as any);
-      if (res && res.ok) break;
-    }
     let resSettings: any = null;
-    for (const b of bases) {
-      resSettings = await fetch(`${b}/api/settings/public`).catch(() => null as any);
-      if (resSettings && resSettings.ok) break;
+    if (apiBinding?.fetch) {
+      res = await apiBinding.fetch("http://api/api/universities").catch(() => null as any);
+      resSettings = await apiBinding.fetch("http://api/api/settings/public").catch(() => null as any);
+    } else {
+      const envApi = (context as any)?.env?.API_URL as string | undefined;
+      const bases = [
+        ...(envApi ? [envApi] : []),
+        "http://127.0.0.1:3001",
+        "http://localhost:3001",
+        "http://127.0.0.1:8787"
+      ];
+      for (const b of bases) {
+        res = await fetch(`${b}/api/universities`).catch(() => null as any);
+        if (res && res.ok) break;
+      }
+      for (const b of bases) {
+        resSettings = await fetch(`${b}/api/settings/public`).catch(() => null as any);
+        if (resSettings && resSettings.ok) break;
+      }
     }
     let list: University[] = [];
     let featured: FeaturedUniversity | null = null;
