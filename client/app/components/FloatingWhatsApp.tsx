@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
-import { openWhatsApp } from '~/utils/whatsapp';
+import { openWhatsApp } from '../utils/whatsapp';
 
 export default function FloatingWhatsApp() {
   return (

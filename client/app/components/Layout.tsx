@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import FloatingWhatsApp from './FloatingWhatsApp';
+import FloatingActions from './FloatingActions';
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,6 +15,7 @@ export default function Layout({ children }: LayoutProps) {
       <main className="flex-grow pt-20">{children}</main>
       <Footer />
       <FloatingWhatsApp />
+      <FloatingActions />
     </div>
   );
 }

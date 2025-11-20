@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface StatItem {
   label: string;
@@ -13,54 +11,57 @@ interface StatsCounterProps {
   stats: StatItem[];
 }
 
-function CountUp({ end, duration = 2, prefix = '', suffix = '' }: { end: number; duration?: number; prefix?: string; suffix?: string }) {
+function CountUp({ end, start, duration = 2, prefix = '', suffix = '' }: { end: number; start: boolean; duration?: number; prefix?: string; suffix?: string }) {
   const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
   useEffect(() => {
-    if (isInView) {
-      let startTime: number;
-      const step = (timestamp: number) => {
-        if (!startTime) startTime = timestamp;
-        const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
-        setCount(Math.floor(progress * end));
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        }
-      };
-      requestAnimationFrame(step);
-    }
-  }, [isInView, end, duration]);
-
-  return (
-    <span ref={ref}>
-      {prefix}{count}{suffix}
-    </span>
-  );
+    if (!start) return;
+    let startTime = 0;
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+      setCount(Math.floor(progress * end));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [start, end, duration]);
+  return <span>{prefix}{count}{suffix}</span>;
 }
 
 export default function StatsCounter({ stats }: StatsCounterProps) {
+  const refs = useRef<Array<HTMLDivElement | null>>([]);
+  const [visible, setVisible] = useState<boolean[]>(stats.map(() => false));
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const idx = refs.current.indexOf(entry.target as HTMLDivElement);
+        if (idx >= 0 && entry.isIntersecting) {
+          setVisible((prev) => {
+            if (prev[idx]) return prev;
+            const next = [...prev];
+            next[idx] = true;
+            return next;
+          });
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+    refs.current.forEach((el) => el && observer.observe(el));
+    return () => observer.disconnect();
+  }, [stats.length]);
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
       {stats.map((stat, index) => (
-        <motion.div
+        <div
           key={stat.label}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
-          viewport={{ once: true }}
-          className="text-center"
+          ref={(el) => (refs.current[index] = el)}
+          className={`text-center transition-all duration-700 ${visible[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}
+          style={{ transitionDelay: `${index * 100}ms` }}
         >
           <div className="text-4xl md:text-5xl font-bold text-primary-600 mb-2">
-            <CountUp 
-              end={stat.value} 
-              prefix={stat.prefix} 
-              suffix={stat.suffix}
-            />
+            <CountUp end={stat.value} start={visible[index]} prefix={stat.prefix} suffix={stat.suffix} />
           </div>
           <div className="text-gray-600 text-sm md:text-base">{stat.label}</div>
-        </motion.div>
+        </div>
       ))}
     </div>
   );

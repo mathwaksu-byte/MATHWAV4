@@ -1,5 +1,6 @@
 import type { LinksFunction, MetaFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
+import Layout from "./components/Layout";
 import { json } from "@remix-run/cloudflare";
 import styles from "./styles/tailwind.css?url";
 
@@ -12,7 +13,10 @@ export async function loader({ context }: LoaderFunctionArgs) {
   return json({
     SUPABASE_URL: env.SUPABASE_URL || "",
     SUPABASE_ANON_KEY: env.SUPABASE_ANON_KEY || "",
-    API_URL: env.API_URL || ""
+    API_URL: env.API_URL || "",
+    WHATSAPP_NUMBER: env.WHATSAPP_NUMBER || "",
+    WHATSAPP_MESSAGE: env.WHATSAPP_MESSAGE || "",
+    CALL_NUMBER: env.CALL_NUMBER || ""
   });
 }
 
@@ -27,7 +31,9 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Outlet />
+        <Layout>
+          <Outlet />
+        </Layout>
         <ScrollRestoration />
         <script
           dangerouslySetInnerHTML={{

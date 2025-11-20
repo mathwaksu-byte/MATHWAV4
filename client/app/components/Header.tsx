@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { FaPhone, FaWhatsapp } from 'react-icons/fa';
 import { HiMenu, HiX } from 'react-icons/hi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { openWhatsApp } from '~/utils/whatsapp';
+import { openWhatsApp } from '../utils/whatsapp';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

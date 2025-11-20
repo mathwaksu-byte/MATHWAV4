@@ -19,23 +19,17 @@ type University = {
 
 export async function loader({ params, context }: LoaderFunctionArgs) {
   const slug = params.slug ?? '';
-  const apiBinding = (context as any)?.env?.API as any;
-  const apiUrlRaw = (context as any)?.env?.API_URL as any;
-  const envApi = typeof apiUrlRaw === 'string' && apiUrlRaw ? apiUrlRaw : undefined;
+  const envBase = (context as any)?.env?.PUBLIC_SERVER_BASE_URL as string | undefined || (import.meta as any)?.env?.PUBLIC_SERVER_BASE_URL as string | undefined;
+  const bases = [
+    ...(envBase ? [envBase] : []),
+    'http://localhost:3001',
+    'http://localhost:4000',
+    'http://localhost:4001'
+  ];
   let res: any = null;
-  if (apiBinding?.fetch) {
-    res = await apiBinding.fetch(new Request(`https://api.local/api/universities/${slug}`)).catch(() => null as any);
-  } else {
-    const bases = [
-      ...(envApi ? [envApi] : []),
-      'http://127.0.0.1:3001',
-      'http://localhost:3001',
-      'http://127.0.0.1:8787'
-    ];
-    for (const b of bases) {
-      res = await fetch(`${b}/api/universities/${slug}`).catch(() => null as any);
-      if (res && res.ok) break;
-    }
+  for (const b of bases) {
+    res = await fetch(`${b}/api/universities/${slug}`).catch(() => null as any);
+    if (res && res.ok) break;
   }
   if (!res || !res.ok) {
     throw new Response('University not found', { status: 404 });
