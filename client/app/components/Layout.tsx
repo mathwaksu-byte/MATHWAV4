@@ -12,7 +12,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow pt-20">{children}</main>
+      <main className="flex-grow pt-5">{children}</main>
       <Footer />
       <FloatingWhatsApp />
       <FloatingActions />
