@@ -27,7 +27,7 @@ app.use('/*', cors({
     if (!origin) return list[0];
     if (list.includes(origin)) return origin;
     if (origin.endsWith('.pages.dev')) return origin;
-    return false;
+    return undefined;
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
