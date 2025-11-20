@@ -1,0 +1,7 @@
+name = "mathwa-admin"
+pages_build_output_dir = "./dist"
+compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2025-11-19"
+
+[env.production.vars]
+VITE_API_URL = "https://mathwa-api.mathwaksu.workers.dev/api"
