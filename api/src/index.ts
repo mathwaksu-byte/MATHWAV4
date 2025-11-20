@@ -17,12 +17,18 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 // CORS configuration
 app.use('/*', cors({
-  origin: [
-    'https://53e80810.mathwa-admin.pages.dev',
-    'http://localhost:3002',
-    'http://localhost:5173',
-    'https://mathwa-admin.pages.dev'
-  ],
+  origin: (origin) => {
+    const list = [
+      'http://localhost:3002',
+      'http://localhost:5173',
+      'https://mathwa-admin.pages.dev',
+      'https://admin-c96.pages.dev'
+    ];
+    if (!origin) return list[0];
+    if (list.includes(origin)) return origin;
+    if (origin.endsWith('.pages.dev')) return origin;
+    return false;
+  },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true
