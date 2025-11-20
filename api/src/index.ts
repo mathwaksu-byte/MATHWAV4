@@ -374,6 +374,37 @@ app.get('/api/applications/admin/:id', async c => {
   }
 });
 
+app.delete('/api/applications/admin/:id', async c => {
+  try {
+    const authHeader = c.req.header('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'No token provided' }, 401);
+    }
+
+    const token = authHeader.substring(7);
+    try {
+      jwt.verify(token, c.env['JWT_SECRET'] || 'fallback-secret');
+    } catch (_) {
+      return c.json({ error: 'Invalid token' }, 401);
+    }
+
+    const id = c.req.param('id');
+    const supabase = getSupabaseAdmin(c.env);
+    const { error } = await supabase
+      .from('Lead')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      return c.json({ error: 'Failed to delete application' }, 500);
+    }
+
+    return c.json({ message: 'Application deleted successfully' });
+  } catch (_) {
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
 // Admin: Get all testimonials
 app.get('/api/testimonials/admin', async c => {
   try {
