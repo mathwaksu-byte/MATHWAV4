@@ -14,6 +14,7 @@ import DisplayPictures from './pages/DisplayPictures';
 import SiteSettingsMedia from './pages/SiteSettingsMedia';
 import MyMenu from './MyMenu';
 import dataProvider from './dataProvider';
+import LoginPage from './LoginPage';
 
 
 const MyLayout = (props: any) => <Layout {...props} menu={MyMenu} />;
@@ -224,6 +225,7 @@ function App() {
       dashboard={Dashboard}
       title="MATHWA Admin"
       layout={MyLayout}
+      loginPage={LoginPage}
     >
       <Resource name="universities" icon={SchoolIcon} list={UniversitiesList} create={UniversitiesCreate} edit={UniversitiesEdit} show={ShowGuesser} />
       <Resource name="applications" icon={AssignmentIcon} list={ApplicationsList} edit={ApplicationsEdit} show={ShowGuesser} />

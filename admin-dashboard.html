@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.25rem;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .hidden {
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <div>
+                <span id="adminUsername"></span>
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">Loading admin data...</div>
+        <div id="error" class="error hidden"></div>
+
+        <div id="dashboardContent" class="hidden">
+            <div class="card">
+                <h2>Quick Actions</h2>
+                <button class="btn" onclick="loadUsers()">View Users</button>
+                <button class="btn" onclick="loadOrders()">View Orders</button>
+                <button class="btn" onclick="loadProducts()">View Products</button>
+            </div>
+
+            <div id="dataContent" class="card hidden">
+                <h2 id="dataTitle">Data</h2>
+                <div id="dataDisplay"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://mathwa-api.mathwaksu.workers.dev/api';
+        
+        // Check if user is logged in
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = 'simple-admin-login.html';
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Verify token is still valid
+                const response = await fetch(`${API_URL}/auth/admin/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Session expired');
+                }
+
+                const adminData = await response.json();
+                document.getElementById('adminUsername').textContent = `Welcome, ${adminData.username}`;
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboardContent').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                localStorage.removeItem('adminToken');
+                window.location.href = 'simple-admin-login.html';
+            }
+        }
+
+        async function loadUsers() {
+            await loadData('users', 'Users');
+        }
+
+        async function loadOrders() {
+            await loadData('orders', 'Orders');
+        }
+
+        async function loadProducts() {
+            await loadData('products', 'Products');
+        }
+
+        async function loadData(endpoint, title) {
+            const dataContent = document.getElementById('dataContent');
+            const dataTitle = document.getElementById('dataTitle');
+            const dataDisplay = document.getElementById('dataDisplay');
+            const error = document.getElementById('error');
+            
+            error.classList.add('hidden');
+            dataContent.classList.add('hidden');
+            
+            try {
+                const response = await fetch(`${API_URL}/${endpoint}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load ${endpoint}`);
+                }
+
+                const data = await response.json();
+                
+                dataTitle.textContent = title;
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    // Create a simple table
+                    let tableHTML = '<table><thead><tr>';
+                    const headers = Object.keys(data[0]);
+                    headers.forEach(header => {
+                        tableHTML += `<th>${header}</th>`;
+                    });
+                    tableHTML += '</tr></thead><tbody>';
+                    
+                    data.forEach(item => {
+                        tableHTML += '<tr>';
+                        headers.forEach(header => {
+                            tableHTML += `<td>${item[header] || ''}</td>`;
+                        });
+                        tableHTML += '</tr>';
+                    });
+                    
+                    tableHTML += '</tbody></table>';
+                    dataDisplay.innerHTML = tableHTML;
+                } else {
+                    dataDisplay.innerHTML = '<p>No data found.</p>';
+                }
+                
+                dataContent.classList.remove('hidden');
+                
+            } catch (err) {
+                error.textContent = `Error loading ${endpoint}: ${err.message}`;
+                error.classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'simple-admin-login.html';
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>
