@@ -70,9 +70,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Serve locally stored uploads when Supabase is unavailable
-const uploadsDir = path.resolve(process.cwd(), 'uploads');
-app.use('/files', express.static(uploadsDir));
+ 
 
 // API routes
 app.use('/api/auth', authRouter);

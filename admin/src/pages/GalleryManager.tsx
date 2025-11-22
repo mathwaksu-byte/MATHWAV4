@@ -8,6 +8,7 @@ export default function GalleryManager() {
   const [universities, setUniversities] = useState<Array<{ slug: string; name: string }>>([]);
   const [slug, setSlug] = useState('');
   const [files, setFiles] = useState<FileList | null>(null);
+  const [localPreview, setLocalPreview] = useState<string[]>([]);
   const [preview, setPreview] = useState<string[]>([]);
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [uploading, setUploading] = useState(false);
@@ -32,6 +33,14 @@ export default function GalleryManager() {
     }).catch(() => {});
   }, [slug]);
 
+  const onFilesChanged = (fl: FileList | null) => {
+    setFiles(fl);
+    // Revoke old URLs
+    localPreview.forEach(u => URL.revokeObjectURL(u));
+    const urls = fl ? Array.from(fl).map(f => URL.createObjectURL(f)) : [];
+    setLocalPreview(urls);
+  };
+
   const upload = async () => {
     if (!slug || !files || files.length === 0) return;
     setUploading(true);
@@ -41,10 +50,13 @@ export default function GalleryManager() {
       Array.from(files).forEach(f => fd.append('images', f));
       const res = await axios.post(`${API_URL}/admin/universities/${slug}/gallery`, fd);
       const u = res.data.university || {};
-      const urls = Array.isArray(u.gallery) ? u.gallery.map((g: any) => g.url).filter(Boolean) : [];
+      const urls = Array.isArray(u.gallery_urls) ? u.gallery_urls : [];
       setPreview(urls);
       setMessage('Gallery updated');
       setFiles(null);
+      // Clear local preview
+      localPreview.forEach(u => URL.revokeObjectURL(u));
+      setLocalPreview([]);
     } catch {
       setMessage('Upload failed');
     } finally {
@@ -62,7 +74,7 @@ export default function GalleryManager() {
     try {
       const res = await axios.delete(`${API_URL}/admin/universities/${slug}/gallery`, { data: { urls } });
       const u = res.data.university || {};
-      const next = Array.isArray(u.gallery) ? u.gallery.map((g: any) => g.url).filter(Boolean) : [];
+      const next = Array.isArray(u.gallery_urls) ? u.gallery_urls : [];
       setPreview(next);
       setSelected({});
       setMessage('Removed selected images');
@@ -89,7 +101,7 @@ export default function GalleryManager() {
       <Divider sx={{ my: 2 }} />
       <Grid container spacing={2} alignItems="center">
         <Grid item>
-          <input type="file" multiple accept="image/png,image/jpeg,image/webp" onChange={e => setFiles(e.target.files)} />
+          <input type="file" multiple accept="image/png,image/jpeg,image/webp" onChange={e => onFilesChanged(e.target.files)} />
         </Grid>
         <Grid item>
           <Button onClick={upload} disabled={uploading} variant="contained">{uploading ? 'Uploading…' : 'Upload Images'}</Button>
@@ -109,6 +121,26 @@ export default function GalleryManager() {
           </Grid>
         )}
       </Grid>
+      {/* Local selected files preview (before uploading) */}
+      {localPreview.length > 0 && (
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="subtitle1">Selected (not uploaded yet)</Typography>
+          <ImageList variant="masonry" cols={3} gap={12} sx={{ mt: 1 }}>
+            {localPreview.map((u, i) => (
+              <ImageListItem key={`local-${i}`}>
+                <Box sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                  <Box sx={{ aspectRatio: '4 / 3', bgcolor: 'grey.100' }}>
+                    <img src={u} alt="Local preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </Box>
+                </Box>
+                <ImageListItemBar position="below" title={<Typography variant="caption">New</Typography>} />
+              </ImageListItem>
+            ))}
+          </ImageList>
+        </Box>
+      )}
+
+      {/* Existing gallery preview from server */}
       <Box sx={{ mt: 3, maxHeight: 480, overflowY: 'auto' }}>
         <ImageList variant="masonry" cols={3} gap={12}>
           {preview.map((u) => (

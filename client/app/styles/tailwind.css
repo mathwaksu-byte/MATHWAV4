@@ -60,6 +60,13 @@ html, body { height: 100%; }
   .glow-effect {
     @apply shadow-lg hover:shadow-primary-500/50 transition-shadow duration-300;
   }
+  
+  /* Glass morphism utility */
+  .glass {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
 }
 
 @layer utilities {

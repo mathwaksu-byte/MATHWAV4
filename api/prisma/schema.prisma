@@ -109,5 +109,6 @@ model SiteSetting {
   hero_video_poster_url   String?
   background_theme_id     String?
   background_gradient_css String?
+  logo_url                String?
   updated_at              DateTime @default(now())
 }

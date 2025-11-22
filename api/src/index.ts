@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
+import bcryptjs from 'bcryptjs';
 
 type Bindings = {
   SUPABASE_DB_SESSION_POOLER_URL?: string;
@@ -11,23 +12,30 @@ type Bindings = {
   SUPABASE_SERVICE_ROLE_KEY?: string;
   JWT_SECRET?: string;
   USE_LOCAL_ADMIN?: string;
+  CLIENT_URL?: string;
+  ADMIN_URL?: string;
+  ADMIN_URLS?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-// CORS configuration
 app.use('/*', cors({
-  origin: (origin) => {
-    const list = [
+  origin: (origin, c) => {
+    const env = c.env as Bindings;
+    const baseAllowed = [
+      env.CLIENT_URL,
+      env.ADMIN_URL,
+      'http://localhost:3001',
       'http://localhost:3002',
-      'http://localhost:5173',
-      'https://mathwa-admin.pages.dev',
-      'https://admin-c96.pages.dev'
-    ];
-    if (!origin) return list[0];
-    if (list.includes(origin)) return origin;
-    if (origin.endsWith('.pages.dev')) return origin;
-    return undefined;
+      'http://localhost:5173'
+    ].filter(Boolean) as string[];
+    const extra = (env.ADMIN_URLS || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+    const allowed = new Set([...baseAllowed, ...extra]);
+    if (!origin) return baseAllowed[0] || 'http://localhost:3001';
+    return allowed.has(origin) ? origin : undefined;
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
@@ -248,7 +256,11 @@ app.get('/api/universities/admin/all', async c => {
 
     const token = authHeader.substring(7);
     try {
-      jwt.verify(token, c.env['JWT_SECRET'] || 'fallback-secret');
+      {
+        const secret = c.env['JWT_SECRET'];
+        if (!secret) return c.json({ error: 'Missing JWT secret' }, 500);
+        jwt.verify(token, secret);
+      }
     } catch (err) {
       return c.json({ error: 'Invalid token' }, 401);
     }
@@ -286,7 +298,11 @@ app.get('/api/universities/admin/:id', async c => {
 
     const token = authHeader.substring(7);
     try {
-      jwt.verify(token, c.env['JWT_SECRET'] || 'fallback-secret');
+      {
+        const secret = c.env['JWT_SECRET'];
+        if (!secret) return c.json({ error: 'Missing JWT secret' }, 500);
+        jwt.verify(token, secret);
+      }
     } catch (err) {
       return c.json({ error: 'Invalid token' }, 401);
     }
@@ -637,44 +653,11 @@ app.post('/api/auth/admin/login', async c => {
       JWT_SECRET_exists: !!c.env['JWT_SECRET']
     });
     
-    // Force development bypass for now to test the login functionality
-    // This bypasses the Supabase configuration issue
-    if (email === 'admin@mathwa.com' && password === 'Admin@123') {
-      const admin = {
-        id: 'dev-admin-id',
-        email,
-        full_name: 'Admin User',
-        role: 'admin'
-      };
-      
-      const token = jwt.sign(
-        { userId: admin.id, email: admin.email, role: admin.role },
-        c.env['JWT_SECRET'] || 'fallback-secret',
-        { expiresIn: '7d' }
-      );
-      
-      return c.json({ token, user: admin });
-    }
+    
     
     // Original logic - Check if using development bypass first, before trying Supabase
     if (c.env.USE_LOCAL_ADMIN === 'true') {
-      if (email === 'admin@mathwa.com' && password === 'Admin@123') {
-        const admin = {
-          id: 'dev-admin-id',
-          email,
-          full_name: 'Admin User',
-          role: 'admin'
-        };
-        
-        const token = jwt.sign(
-          { userId: admin.id, email: admin.email, role: admin.role },
-          c.env['JWT_SECRET'] || 'fallback-secret',
-          { expiresIn: '7d' }
-        );
-        
-        return c.json({ token, user: admin });
-      }
-      return c.json({ error: 'Invalid credentials' }, 401);
+      return c.json({ error: 'Development bypass disabled' }, 403);
     }
     
     // Only initialize Supabase if not using development bypass
@@ -692,23 +675,27 @@ app.post('/api/auth/admin/login', async c => {
       return c.json({ error: 'Invalid credentials' }, 401);
     }
     
-    // For now, use a simple password check since bcrypt is not working in Workers
-    // In production, you should use a proper password hashing library compatible with Workers
-    const isValidPassword = password === 'Admin@123'; // Simple check for now
-    if (!isValidPassword) {
+    const hash = (admin as any).password_hash as string | undefined;
+    if (!hash) {
+      return c.json({ error: 'Invalid credentials' }, 401);
+    }
+    const ok = await bcryptjs.compare(password, hash);
+    if (!ok) {
       return c.json({ error: 'Invalid credentials' }, 401);
     }
     
     // Generate JWT token
-    const token = jwt.sign(
-      { userId: admin.id, email: admin.email, role: admin.role },
-      c.env['JWT_SECRET'] || 'fallback-secret',
-      { expiresIn: '7d' }
-    );
-    
-    // Remove password hash from response
-    const { password_hash, ...safeUser } = admin;
-    return c.json({ token, user: safeUser });
+    {
+      const secret = c.env['JWT_SECRET'];
+      if (!secret) return c.json({ error: 'Missing JWT secret' }, 500);
+      const token = jwt.sign(
+        { userId: admin.id, email: admin.email, role: admin.role },
+        secret,
+        { expiresIn: '7d' }
+      );
+      const { password_hash, ...safeUser } = admin as any;
+      return c.json({ token, user: safeUser });
+    }
     
   } catch (error) {
     console.error('Login error:', error);
@@ -725,7 +712,9 @@ app.get('/api/auth/admin/me', async c => {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, c.env['JWT_SECRET'] || 'fallback-secret') as any;
+    const secret = c.env['JWT_SECRET'];
+    if (!secret) return c.json({ error: 'Missing JWT secret' }, 500);
+    const decoded = jwt.verify(token, secret) as any;
     
     // For development, return a simple admin object
     // In production, you would fetch this from the database

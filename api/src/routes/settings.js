@@ -32,6 +32,7 @@ router.put(
     body('hero_video_poster_url').optional().trim(),
     body('background_theme_id').optional().trim(),
     body('background_gradient_css').optional().trim(),
+    body('logo_url').optional().trim(),
     validate
   ],
   async (req, res, next) => {

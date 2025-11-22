@@ -4,8 +4,7 @@ import { supabaseAdmin } from '../config/supabase.js';
 import { authenticate } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs';
-import path from 'path';
+import { uploadToStorage, deleteFromStorage } from '../utils/storageApi.js';
 
 const router = express.Router();
 
@@ -13,11 +12,10 @@ const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024, // 5MB default
+    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 200 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/jpg,application/pdf').split(',');
-    
+    const allowedTypes = (process.env.ALLOWED_FILE_TYPES || 'image/jpeg,image/png,image/jpg,image/webp,application/pdf,video/mp4,video/webm').split(',');
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -38,50 +36,20 @@ router.post('/single', upload.single('file'), async (req, res, next) => {
     const fileName = `${folder ? folder + '/' : ''}${uuidv4()}.${fileExt}`;
 
     try {
-      const { data, error } = await supabaseAdmin.storage
-        .from(bucket)
-        .upload(fileName, req.file.buffer, {
-          contentType: req.file.mimetype,
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabaseAdmin.storage
-        .from(bucket)
-        .getPublicUrl(fileName);
-
+      // Use our custom storage API for upload
+      const fileUrl = await uploadToStorage(bucket, fileName, req.file.buffer, req.file.mimetype);
+      
       return res.json({
         file: {
-          path: data.path,
-          url: publicUrl,
+          path: fileName,
+          url: fileUrl,
           size: req.file.size,
           mimetype: req.file.mimetype
         }
       });
-    } catch (err) {
-      // In production, do NOT fallback — require proper Supabase configuration
-      const allowLocal = (process.env.ALLOW_LOCAL_UPLOADS || 'false') === 'true';
-      const isProd = (process.env.NODE_ENV || 'development') === 'production';
-      if (isProd || !allowLocal) {
-        return next(new AppError('Storage upload failed. Configure SUPABASE_URL and keys.', 500));
-      }
-      const base = path.resolve(process.cwd(), 'uploads');
-      const outPath = path.join(base, bucket, fileName.replace(/\\/g, '/'));
-      fs.mkdirSync(path.dirname(outPath), { recursive: true });
-      fs.writeFileSync(outPath, req.file.buffer);
-      const origin = `${req.protocol}://${req.get('host')}`;
-      const publicUrl = `${origin}/files/${bucket}/${fileName}`;
-      return res.json({
-        file: {
-          path: `${bucket}/${fileName}`,
-          url: publicUrl,
-          size: req.file.size,
-          mimetype: req.file.mimetype,
-          fallback: true
-        }
-      });
+    } catch (uploadError) {
+      console.error('Upload error:', uploadError);
+      return next(new AppError('Storage upload failed. ' + uploadError.message, 500));
     }
   } catch (error) {
     next(error);
@@ -139,13 +107,14 @@ router.delete('/', authenticate, async (req, res, next) => {
       throw new AppError('File path is required', 400);
     }
 
-    const { error } = await supabaseAdmin.storage
-      .from(bucket)
-      .remove([path]);
-
-    if (error) throw error;
-
-    res.json({ message: 'File deleted successfully' });
+    try {
+      // Use our custom storage API for deletion
+      await deleteFromStorage(bucket, path);
+      res.json({ message: 'File deleted successfully' });
+    } catch (deleteError) {
+      console.error('Delete error:', deleteError);
+      return next(new AppError('File deletion failed. ' + deleteError.message, 500));
+    }
   } catch (error) {
     next(error);
   }

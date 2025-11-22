@@ -1,19 +1,27 @@
 import { Link } from "@remix-run/react";
 
-export default function Footer() {
+type FooterProps = {
+  siteSettings?: any;
+};
+
+export default function Footer({ siteSettings }: FooterProps) {
   return (
     <footer className="mt-24 border-t border-slate-200 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-3 flex-nowrap -ml-4 sm:-ml-6 lg:-ml-8">
-              <img
-                src="/ksu-logo.png"
-                alt="I. Arabaev Kyrgyz State University logo"
-                className="w-8 h-8 rounded-full object-contain bg-white p-0.5 border border-blue-200 ring-1 ring-blue-200 shadow-sm"
-                loading="eager"
-                decoding="async"
-              />
+              {siteSettings?.logo_url ? (
+                <img
+                  src={siteSettings.logo_url}
+                  alt="Brand logo"
+                  className="w-8 h-8 rounded-full object-contain bg-white p-0.5 border border-blue-200 ring-1 ring-blue-200 shadow-sm"
+                  loading="eager"
+                  decoding="async"
+                />
+              ) : (
+                <span className="inline-block w-8 h-8 rounded-full bg-gradient-to-br from-royalBlue to-blue-500 shadow-glow" />
+              )}
               <span className="font-semibold text-royalBlue whitespace-nowrap">Kyrgyz State University</span>
               <span className="ml-1 inline-flex items-center rounded-full bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 text-[10px] sm:text-xs whitespace-nowrap">
                 — MATHWA (Official Partner)

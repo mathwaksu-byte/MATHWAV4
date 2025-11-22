@@ -1,10 +1,17 @@
-import { Link, NavLink, useLocation } from "@remix-run/react";
+import { Link, NavLink, useLocation, useFetcher } from "@remix-run/react";
 import { useEffect, useState } from "react";
 
-export default function Navbar() {
+type NavbarProps = {
+  siteSettings?: any;
+};
+
+export default function Navbar({ siteSettings: siteSettingsProp }: NavbarProps) {
   const location = useLocation();
+  const fetcher = useFetcher();
   const [scrolled, setScrolled] = useState(false);
   const [logoOk, setLogoOk] = useState(true);
+  const [siteSettings, setSiteSettings] = useState<any>(siteSettingsProp || null);
+  const [settingsLoading, setSettingsLoading] = useState(!siteSettingsProp);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -12,6 +19,19 @@ export default function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!siteSettingsProp && fetcher.state === "idle" && !fetcher.data) {
+      fetcher.load("/api/settings/public");
+    }
+  }, [fetcher, siteSettingsProp]);
+
+  useEffect(() => {
+    if (fetcher.data?.settings) {
+      setSiteSettings(fetcher.data.settings);
+      setSettingsLoading(false);
+    }
+  }, [fetcher.data]);
 
   return (
     <header
@@ -22,17 +42,17 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           <Link to="/" className="flex items-center gap-2.5 flex-nowrap">
-            {logoOk ? (
+            {siteSettings?.logo_url && logoOk ? (
               <img
-                src="/ksu-logo.png"
-                alt="I. Arabaev Kyrgyz State University logo"
+                src={siteSettings.logo_url}
+                alt="Brand logo"
                 className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-contain bg-white p-0.5 border border-blue-200 ring-1 ring-blue-200 shadow-sm"
                 loading="eager"
                 decoding="async"
                 onError={() => setLogoOk(false)}
               />
             ) : (
-              <span className="inline-block w-7 h-7 rounded-full bg-gradient-to-br from-royalBlue to-blue-500 shadow-glow" />
+              <span className="inline-block w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-royalBlue to-blue-500 shadow-glow" />
             )}
             <span className="font-semibold text-royalBlue tracking-tight">Kyrgyz State University</span>
             <span className="ml-1 inline-flex items-center rounded-full bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 text-[10px] sm:text-xs whitespace-nowrap">

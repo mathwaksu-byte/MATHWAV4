@@ -6,14 +6,15 @@ import FloatingActions from './FloatingActions';
 
 interface LayoutProps {
   children: ReactNode;
+  siteSettings?: any;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, siteSettings }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar siteSettings={siteSettings} />
       <main className="flex-grow pt-5">{children}</main>
-      <Footer />
+      <Footer siteSettings={siteSettings} />
       <FloatingWhatsApp />
       <FloatingActions />
     </div>

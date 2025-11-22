@@ -7,7 +7,7 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import ArticleIcon from '@mui/icons-material/Article';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 import FeesEditor from './pages/FeesEditor';
 import GalleryManager from './pages/GalleryManager';
 import DisplayPictures from './pages/DisplayPictures';
@@ -15,11 +15,146 @@ import SiteSettingsMedia from './pages/SiteSettingsMedia';
 import MyMenu from './MyMenu';
 import dataProvider from './dataProvider';
 import LoginPage from './LoginPage';
+import { useState, useRef } from 'react';
+import axios from 'axios';
 
 
 const MyLayout = (props: any) => <Layout {...props} menu={MyMenu} />;
 
-import { List, Datagrid, TextField, BooleanField, DateField, NumberField, Create, Edit, SimpleForm, TextInput, BooleanInput, NumberInput, Toolbar, SaveButton, DeleteButton, SelectInput, ArrayInput, SimpleFormIterator } from 'react-admin';
+import { List, Datagrid, TextField, BooleanField, DateField, NumberField, Create, Edit, SimpleForm, TextInput, BooleanInput, Toolbar, SaveButton, DeleteButton, SelectInput, ArrayInput, SimpleFormIterator, useInput } from 'react-admin';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+const LogoUploadInput = ({ source }: any) => {
+  const { field } = useInput({ source });
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoUrl = String(field.value || '');
+
+  const authHeader = () => {
+    const t = localStorage.getItem('token');
+    return t ? { Authorization: `Bearer ${t}` } : {};
+  };
+
+  const uploadFile = async (file: File) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('bucket', 'uploads');
+    fd.append('folder', 'site/logo');
+    const res = await axios.post(`${API_URL}/uploads/single`, fd);
+    return res.data?.file?.url as string;
+  };
+
+  const deleteFile = async (fileUrl: string) => {
+    if (!fileUrl) return;
+    const url = new URL(fileUrl);
+    const decodedPath = decodeURIComponent(url.pathname);
+    const match = decodedPath.match(/\/storage\/v1\/object\/public\/(.*?)\/(.*)$/);
+    if (!match) throw new Error('Could not extract bucket/path from URL');
+    const bucket = match[1];
+    const path = match[2];
+    await axios.delete(`${API_URL}/uploads`, {
+      data: { bucket, path },
+      headers: authHeader()
+    });
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    try {
+      // Delete existing logo if any
+      if (logoUrl) await deleteFile(logoUrl);
+      
+      // Upload new logo
+      const newLogoUrl = await uploadFile(file);
+      field.onChange(newLogoUrl);
+    } catch (error) {
+      console.error('Failed to upload logo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeLogo = async () => {
+    if (!logoUrl) return;
+    
+    setLoading(true);
+    try {
+      await deleteFile(logoUrl);
+      field.onChange('');
+    } catch (error) {
+      console.error('Failed to remove logo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <label style={{ display: 'block', marginBottom: 8 }}>Brand Logo</label>
+      {logoUrl ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 12, backgroundColor: '#f8fafc', borderRadius: 4 }}>
+          <img src={logoUrl} alt="Current logo" style={{ width: 60, height: 60, objectFit: 'contain' }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, color: '#666' }}>Current Logo</div>
+            <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{logoUrl.split('/').pop()}</div>
+          </div>
+          <button
+            type="button"
+            onClick={removeLogo}
+            disabled={loading}
+            style={{ 
+              padding: '6px 12px', 
+              fontSize: 12, 
+              backgroundColor: '#ef4444', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: 4, 
+              cursor: 'pointer',
+              opacity: loading ? 0.6 : 1
+            }}
+          >
+            {loading ? 'Removing...' : 'Remove'}
+          </button>
+        </div>
+      ) : (
+        <div style={{ padding: 16, backgroundColor: '#f8fafc', borderRadius: 4, border: '2px dashed #ddd' }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/svg+xml"
+            onChange={handleFileChange}
+            disabled={loading}
+            style={{ display: 'none' }}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#1976d2',
+              color: 'white',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer',
+              opacity: loading ? 0.6 : 1
+            }}
+          >
+            {loading ? 'Uploading...' : 'Upload Logo'}
+          </button>
+          <span style={{ marginLeft: 12, fontSize: 14, color: '#666' }}>
+            PNG, JPEG, or SVG (recommended: 200x200px)
+          </span>
+        </div>
+      )}
+      <input type="hidden" name={source} value={logoUrl} />
+    </div>
+  );
+};
 
 const UniversitiesList = () => (
   <List perPage={25} resource="universities" empty={<div style={{ padding: 16 }}>No records</div>}>
@@ -203,19 +338,22 @@ const BlogsEdit = () => (
   </Edit>
 );
 
-const SettingsEdit = () => (
-  <Edit>
-    <SimpleForm toolbar={<Toolbar><SaveButton /></Toolbar>}>
-      <TextInput source="hero_title" fullWidth />
-      <TextInput source="hero_subtitle" fullWidth />
-      <TextInput source="hero_video_mp4_url" fullWidth />
-      <TextInput source="hero_video_webm_url" fullWidth />
-      <TextInput source="hero_video_poster_url" fullWidth />
-      <TextInput source="background_theme_id" fullWidth />
-      <TextInput source="background_gradient_css" multiline fullWidth />
-    </SimpleForm>
-  </Edit>
-);
+const SettingsEdit = () => {
+  return (
+    <Edit>
+      <SimpleForm toolbar={<Toolbar><SaveButton /></Toolbar>}>
+        <TextInput source="hero_title" fullWidth />
+        <TextInput source="hero_subtitle" fullWidth />
+        <TextInput source="hero_video_mp4_url" fullWidth />
+        <TextInput source="hero_video_webm_url" fullWidth />
+        <TextInput source="hero_video_poster_url" fullWidth />
+        <TextInput source="background_theme_id" fullWidth />
+        <TextInput source="background_gradient_css" multiline fullWidth />
+        <LogoUploadInput source="logo_url" />
+      </SimpleForm>
+    </Edit>
+  );
+};
 
 function App() {
   return (
@@ -234,6 +372,7 @@ function App() {
       <Resource name="blogs" icon={ArticleIcon} list={BlogsList} create={BlogsCreate} edit={BlogsEdit} show={ShowGuesser} />
       <Resource name="settings" icon={SettingsIcon} edit={SettingsEdit} />
       <CustomRoutes>
+        <Route path="/settings" element={<Navigate to="/settings/default" replace />} />
         <Route path="/fees" element={<FeesEditor />} />
         <Route path="/gallery" element={<GalleryManager />} />
         <Route path="/dp" element={<DisplayPictures />} />

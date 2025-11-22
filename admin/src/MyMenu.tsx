@@ -14,7 +14,7 @@ export default function MyMenu() {
       <MenuItemLink to="/testimonials" primaryText="Testimonials" leftIcon={<SchoolIcon />} />
       <MenuItemLink to="/faqs" primaryText="Faqs" leftIcon={<SchoolIcon />} />
       <MenuItemLink to="/blogs" primaryText="Blogs" leftIcon={<SchoolIcon />} />
-      <MenuItemLink to="/settings" primaryText="Site Settings" leftIcon={<SettingsIcon />} />
+      <MenuItemLink to="/settings/default" primaryText="Site Settings" leftIcon={<SettingsIcon />} />
       <MenuItemLink to="/settings-media" primaryText="Hero Media" leftIcon={<SettingsIcon />} />
       <MenuItemLink to="/fees" primaryText="University Fees" leftIcon={<MonetizationOnIcon />} />
       <MenuItemLink to="/gallery" primaryText="University Gallery" leftIcon={<PhotoLibraryIcon />} />

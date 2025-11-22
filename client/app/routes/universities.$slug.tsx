@@ -1,6 +1,6 @@
 import type { MetaFunction } from '@remix-run/react';
 import type { LoaderFunctionArgs } from '@remix-run/cloudflare';
-import { useLoaderData } from '@remix-run/react';
+import { useLoaderData, useRouteLoaderData } from '@remix-run/react';
 import { useEffect, useRef, useState } from 'react';
 
 type University = {
@@ -60,6 +60,8 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export default function UniversityPage() {
   const { university, fees } = useLoaderData<typeof loader>();
   const isOfficialPartner = university.slug === 'kyrgyz-state-university';
+  const rootData = useRouteLoaderData('root') as any;
+  const brandLogoUrl = rootData?.settings?.logo_url || '';
   const [tab, setTab] = useState<'overview'|'fees'|'gallery'>('overview');
   const tabsRef = useRef<Array<HTMLButtonElement | null>>([]);
   useEffect(() => {
@@ -99,14 +101,17 @@ export default function UniversityPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 text-xs sm:text-sm"
               >
-                <img
-                  src="/ksu-logo.png"
-                  alt="I. Arabaev Kyrgyz State University logo"
-                  className="h-6 w-6 sm:h-7 sm:w-7 rounded-full object-contain bg-white p-0.5 border border-blue-200 ring-1 ring-blue-200"
-                  loading="eager"
-                  decoding="async"
-                  onError={(e) => { (e.currentTarget.style.display = 'none'); }}
-                />
+                {brandLogoUrl ? (
+                  <img
+                    src={brandLogoUrl}
+                    alt="Brand logo"
+                    className="h-6 w-6 sm:h-7 sm:w-7 rounded-full object-contain bg-white p-0.5 border border-blue-200 ring-1 ring-blue-200"
+                    loading="eager"
+                    decoding="async"
+                  />
+                ) : (
+                  <span className="inline-block h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-gradient-to-br from-royalBlue to-blue-500" />
+                )}
                 <span className="font-semibold">Kyrgyz State University — MATHWA</span>
               </a>
             </div>
@@ -118,7 +123,7 @@ export default function UniversityPage() {
             ))}
           </div>
         <div className="mt-6 flex gap-3">
-          <a href="/apply" className="px-4 py-2 rounded-md bg-royalBlue text-white">Apply Now</a>
+          <a href="/apply" className="px-4 py-2 rounded-md bg-blue-600 text-white">Apply Now</a>
           <a href="https://wa.me/" className="px-4 py-2 rounded-md bg-green-600 text-white">Admissions Support</a>
         </div>
         </div>
@@ -215,12 +220,12 @@ export default function UniversityPage() {
       </div>
 
       {/* Sticky CTA */}
-      <div className="fixed bottom-4 inset-x-0 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto glass rounded-full px-4 py-2 shadow-glow flex gap-2">
-          <a href="/apply" className="px-4 py-2 rounded-full bg-royalBlue text-white">Start Application</a>
-          <a href="https://wa.me/" className="px-4 py-2 rounded-full bg-green-600 text-white">Chat</a>
+        <div className="fixed bottom-4 inset-x-0 flex justify-center pointer-events-none">
+          <div className="pointer-events-auto glass rounded-full px-4 py-2 shadow-glow flex gap-2">
+            <a href="/apply" className="px-4 py-2 rounded-full bg-blue-600 text-white">Start Application</a>
+            <a href="https://wa.me/" className="px-4 py-2 rounded-full bg-green-600 text-white">Chat</a>
+          </div>
         </div>
-      </div>
     </div>
   );
 }

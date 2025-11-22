@@ -7,7 +7,6 @@ import Testimonials from "../components/Testimonials";
 import FAQ from "../components/FAQ";
 import SkeletonCard from "../components/SkeletonCard";
 import HeroVideo from "../components/HeroVideo";
-import BackgroundVariants from "../components/BackgroundVariants";
 
 export const meta: MetaFunction = () => ([
   { title: "Kyrgyz State University — MATHWA Official Admissions" },
@@ -125,11 +124,6 @@ export default function Index() {
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4">
           <Stats />
-        </div>
-      </section>
-      <section className="px-4">
-        <div className="max-w-7xl mx-auto">
-          <BackgroundVariants />
         </div>
       </section>
       <section className="py-12">
