@@ -7,7 +7,14 @@ type ActionData = { ok: boolean; message?: string } | undefined;
 
 export const meta: MetaFunction = () => ([
   { title: 'Apply — Official Admissions via MATHWA' },
-  { name: 'description', content: 'Submit your application through MATHWA — Official Partner of I. Arabaev Kyrgyz State University.' },
+  { name: 'description', content: 'Submit your application for MBBS in Kyrgyzstan through MATHWA — Official Partner of Kyrgyz State University.' },
+  { property: 'og:title', content: 'Apply — Official Admissions via MATHWA' },
+  { property: 'og:description', content: 'Apply for MBBS in Kyrgyzstan with MATHWA.' },
+  { property: 'og:type', content: 'website' },
+  { property: 'og:image', content: '/uploads/universities/kyrgyz/logo.png' },
+  { name: 'twitter:card', content: 'summary_large_image' },
+  { name: 'twitter:title', content: 'Apply — Official Admissions via MATHWA' },
+  { name: 'twitter:description', content: 'Apply for MBBS in Kyrgyzstan with MATHWA.' }
 ]);
 
 export async function action({ request, context }: ActionFunctionArgs) {

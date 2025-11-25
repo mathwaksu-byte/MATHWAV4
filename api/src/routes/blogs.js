@@ -10,7 +10,17 @@ const router = express.Router();
 // Get all published blogs (public)
 router.get('/', async (req, res, next) => {
   try {
-    const blogs = await prisma.article.findMany({ where: { active: true }, orderBy: { created_at: 'desc' } });
+    const blogs = await prisma.article.findMany({
+      where: {
+        active: true,
+        OR: [
+          { published_at: null },
+          { published_at: { lte: new Date() } }
+        ]
+      },
+      orderBy: { created_at: 'desc' }
+    });
+    res.set('Cache-Control', 'public, max-age=180');
     res.json({ blogs });
   } catch (error) { next(error); }
 });
@@ -20,7 +30,9 @@ router.get('/:slug', async (req, res, next) => {
   try {
     const { slug } = req.params;
     const blog = await prisma.article.findUnique({ where: { slug } });
-    if (!blog || !blog.active) throw new AppError('Blog not found', 404);
+    const isPublished = !blog?.published_at || (blog?.published_at && blog.published_at <= new Date());
+    if (!blog || !blog.active || !isPublished) throw new AppError('Blog not found', 404);
+    res.set('Cache-Control', 'public, max-age=600');
     res.json({ blog });
   } catch (error) { next(error); }
 });

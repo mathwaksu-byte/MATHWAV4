@@ -11,6 +11,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   try {
     const universities = await prisma.university.findMany({ where: { active: true }, orderBy: { created_at: 'desc' } });
+    res.set('Cache-Control', 'public, max-age=120');
     res.json({ universities });
   } catch (error) { next(error); }
 });
@@ -23,6 +24,7 @@ router.get('/:slug', async (req, res, next) => {
     if (!university || !university.active) throw new AppError('University not found', 404);
     const feeRows = await prisma.fee.findMany({ where: { university_id: university.id }, orderBy: { year: 'asc' } });
     const fees = feeRows.map(r => ({ year: r.year, tuition: Number(r.tuition), hostel: Number(r.hostel), misc: Number(r.misc), currency: r.currency }));
+    res.set('Cache-Control', 'public, max-age=300');
     res.json({ university, fees });
   } catch (error) { next(error); }
 });

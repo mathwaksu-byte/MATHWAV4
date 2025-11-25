@@ -96,6 +96,10 @@ model Article {
   title      String
   slug       String   @unique
   content    String?
+  category   String?
+  excerpt    String?
+  og_image_url String?
+  published_at DateTime?
   active     Boolean  @default(true)
   created_at DateTime @default(now())
 }
@@ -110,5 +114,23 @@ model SiteSetting {
   background_theme_id     String?
   background_gradient_css String?
   logo_url                String?
+  default_title           String?
+  default_description     String?
+  default_og_image_url    String?
+  twitter_card_type       String?
   updated_at              DateTime @default(now())
+}
+
+model Backlink {
+  id            String   @id @default(uuid())
+  site_name     String
+  url           String   @unique
+  status        String   @default("prospect")
+  contact_email String?
+  notes         String?
+  published_at  DateTime?
+  created_at    DateTime @default(now())
+
+  @@index([status])
+  @@index([created_at])
 }

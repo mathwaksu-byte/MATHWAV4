@@ -35,6 +35,9 @@ export default function Footer({ siteSettings }: FooterProps) {
               <li><Link to="/universities" className="hover:text-royalBlue">Universities</Link></li>
               <li><Link to="/about" className="hover:text-royalBlue">About us</Link></li>
               <li><Link to="/apply" className="hover:text-royalBlue">Apply</Link></li>
+              <li><Link to="/faqs" className="hover:text-royalBlue">FAQs</Link></li>
+              <li><Link to="/mbbs-kyrgyzstan" className="hover:text-royalBlue">MBBS in Kyrgyzstan</Link></li>
+              <li><Link to="/blog" className="hover:text-royalBlue">Blog</Link></li>
             </ul>
           </div>
           <div>

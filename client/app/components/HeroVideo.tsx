@@ -171,15 +171,15 @@ export default function HeroVideo({
               </p>
             </>
           )}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <a href="/apply" className="px-5 py-2.5 rounded-full bg-blue-600 text-white shadow-glow">Apply Now</a>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <a href="/apply" className="px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base rounded-full bg-blue-600 text-white shadow-glow">Apply Now</a>
             <a
               href="#admissions"
-              className="px-5 py-2.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
+              className="px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base rounded-full bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
             >
               Admissions Desk
             </a>
-            <a href="https://wa.me/" className="px-5 py-2.5 rounded-full bg-green-600 text-white">WhatsApp</a>
+            <a href="https://wa.me/" className="px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base rounded-full bg-green-600 text-white">WhatsApp</a>
           </div>
         </div>
       </div>

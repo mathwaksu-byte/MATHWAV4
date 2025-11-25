@@ -33,6 +33,10 @@ router.put(
     body('background_theme_id').optional().trim(),
     body('background_gradient_css').optional().trim(),
     body('logo_url').optional().trim(),
+    body('default_title').optional().trim(),
+    body('default_description').optional().trim(),
+    body('default_og_image_url').optional().trim(),
+    body('twitter_card_type').optional().trim(),
     validate
   ],
   async (req, res, next) => {

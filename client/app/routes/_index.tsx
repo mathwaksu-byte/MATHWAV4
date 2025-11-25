@@ -9,8 +9,16 @@ import SkeletonCard from "../components/SkeletonCard";
 import HeroVideo from "../components/HeroVideo";
 
 export const meta: MetaFunction = () => ([
-  { title: "Kyrgyz State University — MATHWA Official Admissions" },
-  { name: "description", content: "Official admissions representation for Kyrgyz State University (Arabaev KSU) via MATHWA." },
+  { title: "MBBS in Kyrgyzstan — Official Admissions via MATHWA" },
+  { name: "description", content: "Apply for MBBS in Kyrgyzstan with MATHWA — Official partner of Kyrgyz State University. Fees, eligibility, visa support." },
+  { property: "og:title", content: "MBBS in Kyrgyzstan — Official Admissions via MATHWA" },
+  { property: "og:description", content: "Apply for MBBS in Kyrgyzstan with MATHWA — Official partner of Kyrgyz State University." },
+  { property: "og:type", content: "website" },
+  { property: "og:image", content: "/uploads/universities/kyrgyz/logo.png" },
+  { name: "twitter:card", content: "summary_large_image" },
+  { name: "twitter:title", content: "MBBS in Kyrgyzstan — Official Admissions via MATHWA" },
+  { name: "twitter:description", content: "Official partner admissions for Kyrgyz State University." },
+  { name: "twitter:image", content: "/uploads/universities/kyrgyz/logo.png" }
 ]);
 
 type FeaturedUniversity = {
@@ -20,6 +28,8 @@ type FeaturedUniversity = {
   overview?: string;
 };
 type University = FeaturedUniversity;
+
+import { json } from "@remix-run/cloudflare";
 
 export async function loader({ context }: LoaderFunctionArgs) {
   try {
@@ -37,7 +47,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
       const bases = [
         ...(envApi ? [envApi] : []),
         "http://127.0.0.1:3001",
-        "http://localhost:3001",
+        "http://localhost:3002",
         "http://127.0.0.1:8787"
       ];
       for (const b of bases) {
@@ -81,10 +91,12 @@ export async function loader({ context }: LoaderFunctionArgs) {
     } else {
       console.log("[loader] No settings data received");
     }
-    return { featured, universities: list, settings } as { featured: FeaturedUniversity | null; universities: University[]; settings: any };
+    return json({ featured, universities: list, settings } as { featured: FeaturedUniversity | null; universities: University[]; settings: any }, {
+      headers: { 'Cache-Control': 'public, max-age=60' }
+    });
   } catch (err) {
     console.error("[loader] Error in loader:", err);
-    return {
+    return json({
       featured: null,
       universities: [],
       settings: {
@@ -94,7 +106,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
         hero_video_webm_url: "",
         hero_video_poster_url: "",
       },
-    } as { featured: FeaturedUniversity | null; universities: University[]; settings: any };
+    }, { headers: { 'Cache-Control': 'public, max-age=30' } });
   }
 }
 
@@ -104,6 +116,12 @@ export default function Index() {
   const isLoading = navigation.state !== "idle";
   return (
     <div className="relative">
+      <div className="px-4 pt-2">
+        <div className="flex flex-wrap items-baseline gap-2">
+          <h1 className="text-lg sm:text-xl font-semibold leading-tight tracking-tight text-royalBlue">MBBS in Kyrgyzstan — Official Admissions via MATHWA</h1>
+          <span className="text-xs sm:text-sm text-slate-700">Government accredited programs, transparent fees, visa assistance, and student housing.</span>
+        </div>
+      </div>
       <div className="px-4">
         <HeroVideo
           srcMp4={settings?.hero_video_mp4_url || undefined}

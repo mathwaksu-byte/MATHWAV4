@@ -17,6 +17,7 @@ import testimonialsRouter from './routes/testimonials.js';
 import faqsRouter from './routes/faqs.js';
 import blogsRouter from './routes/blogs.js';
 import statsRouter from './routes/stats.js';
+import backlinksRouter from './routes/backlinks.js';
 import uploadsRouter from './routes/uploads.js';
 import paymentsRouter from './routes/payments.js';
 import contactRouter from './routes/contact.js';
@@ -85,6 +86,7 @@ app.use('/api/uploads', uploadsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/contact', contactRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/backlinks', backlinksRouter);
 
 // 404 handler
 app.use((req, res) => {

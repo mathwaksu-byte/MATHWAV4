@@ -1,7 +1,15 @@
 import type { MetaFunction } from '@remix-run/react';
 
 export const meta: MetaFunction = () => ([
-  { title: 'About — Kyrgyz State University — MATHWA Official Admissions' },
+  { title: 'About — MATHWA Official Admissions' },
+  { name: 'description', content: 'About MATHWA — Official admissions partner for Kyrgyz State University. Learn about our visa support, student care, and partnership.' },
+  { property: 'og:title', content: 'About — MATHWA Official Admissions' },
+  { property: 'og:description', content: 'Official admissions partner for Kyrgyz State University.' },
+  { property: 'og:type', content: 'website' },
+  { property: 'og:image', content: '/uploads/universities/kyrgyz/logo.png' },
+  { name: 'twitter:card', content: 'summary_large_image' },
+  { name: 'twitter:title', content: 'About — MATHWA Official Admissions' },
+  { name: 'twitter:description', content: 'Official admissions partner for Kyrgyz State University.' }
 ]);
 
 export default function About() {

@@ -10,6 +10,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   try {
     const faqs = await prisma.fAQ.findMany({ where: { active: true }, orderBy: { created_at: 'asc' } });
+    res.set('Cache-Control', 'public, max-age=300');
     res.json({ faqs });
   } catch (error) { next(error); }
 });

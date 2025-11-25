@@ -5,6 +5,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import ArticleIcon from '@mui/icons-material/Article';
+import LinkIcon from '@mui/icons-material/Link';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Route, Navigate } from 'react-router-dom';
@@ -21,15 +22,15 @@ import axios from 'axios';
 
 const MyLayout = (props: any) => <Layout {...props} menu={MyMenu} />;
 
-import { List, Datagrid, TextField, BooleanField, DateField, NumberField, Create, Edit, SimpleForm, TextInput, BooleanInput, Toolbar, SaveButton, DeleteButton, SelectInput, ArrayInput, SimpleFormIterator, useInput } from 'react-admin';
+import { List, Datagrid, TextField, BooleanField, DateField, NumberField, Create, Edit, SimpleForm, TextInput, BooleanInput, Toolbar, SaveButton, DeleteButton, SelectInput, ArrayInput, SimpleFormIterator, useInput, NumberInput, DateInput } from 'react-admin';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-const LogoUploadInput = ({ source }: any) => {
+const LogoUploadInput = ({ source, label = 'Brand Logo', folder = 'site/logo', accept = 'image/png,image/jpeg,image/svg+xml', buttonText = 'Upload Logo' }: any) => {
   const { field } = useInput({ source });
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const logoUrl = String(field.value || '');
+  const fileUrl = String(field.value || '');
 
   const authHeader = () => {
     const t = localStorage.getItem('token');
@@ -40,14 +41,14 @@ const LogoUploadInput = ({ source }: any) => {
     const fd = new FormData();
     fd.append('file', file);
     fd.append('bucket', 'uploads');
-    fd.append('folder', 'site/logo');
+    fd.append('folder', folder);
     const res = await axios.post(`${API_URL}/uploads/single`, fd);
     return res.data?.file?.url as string;
   };
 
-  const deleteFile = async (fileUrl: string) => {
-    if (!fileUrl) return;
-    const url = new URL(fileUrl);
+  const deleteFile = async (urlStr: string) => {
+    if (!urlStr) return;
+    const url = new URL(urlStr);
     const decodedPath = decodeURIComponent(url.pathname);
     const match = decodedPath.match(/\/storage\/v1\/object\/public\/(.*?)\/(.*)$/);
     if (!match) throw new Error('Could not extract bucket/path from URL');
@@ -65,28 +66,26 @@ const LogoUploadInput = ({ source }: any) => {
 
     setLoading(true);
     try {
-      // Delete existing logo if any
-      if (logoUrl) await deleteFile(logoUrl);
+      if (fileUrl) await deleteFile(fileUrl);
       
-      // Upload new logo
-      const newLogoUrl = await uploadFile(file);
-      field.onChange(newLogoUrl);
+      const newUrl = await uploadFile(file);
+      field.onChange(newUrl);
     } catch (error) {
-      console.error('Failed to upload logo:', error);
+      console.error('Failed to upload file:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const removeLogo = async () => {
-    if (!logoUrl) return;
+    if (!fileUrl) return;
     
     setLoading(true);
     try {
-      await deleteFile(logoUrl);
+      await deleteFile(fileUrl);
       field.onChange('');
     } catch (error) {
-      console.error('Failed to remove logo:', error);
+      console.error('Failed to remove file:', error);
     } finally {
       setLoading(false);
     }
@@ -94,13 +93,13 @@ const LogoUploadInput = ({ source }: any) => {
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <label style={{ display: 'block', marginBottom: 8 }}>Brand Logo</label>
-      {logoUrl ? (
+      <label style={{ display: 'block', marginBottom: 8 }}>{label}</label>
+      {fileUrl ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 12, backgroundColor: '#f8fafc', borderRadius: 4 }}>
-          <img src={logoUrl} alt="Current logo" style={{ width: 60, height: 60, objectFit: 'contain' }} />
+          <img src={fileUrl} alt="Current file" style={{ width: 60, height: 60, objectFit: 'contain' }} />
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, color: '#666' }}>Current Logo</div>
-            <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{logoUrl.split('/').pop()}</div>
+            <div style={{ fontSize: 14, color: '#666' }}>Current</div>
+            <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>{fileUrl.split('/').pop()}</div>
           </div>
           <button
             type="button"
@@ -125,7 +124,7 @@ const LogoUploadInput = ({ source }: any) => {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png,image/jpeg,image/svg+xml"
+            accept={accept}
             onChange={handleFileChange}
             disabled={loading}
             style={{ display: 'none' }}
@@ -144,14 +143,14 @@ const LogoUploadInput = ({ source }: any) => {
               opacity: loading ? 0.6 : 1
             }}
           >
-            {loading ? 'Uploading...' : 'Upload Logo'}
+            {loading ? 'Uploading...' : buttonText}
           </button>
           <span style={{ marginLeft: 12, fontSize: 14, color: '#666' }}>
-            PNG, JPEG, or SVG (recommended: 200x200px)
+            PNG, JPEG, WEBP, or SVG
           </span>
         </div>
       )}
-      <input type="hidden" name={source} value={logoUrl} />
+      <input type="hidden" name={source} value={fileUrl} />
     </div>
   );
 };
@@ -208,8 +207,10 @@ const BlogsList = () => (
     <Datagrid rowClick="edit">
       <TextField source="title" />
       <TextField source="slug" />
+      <TextField source="category" />
       <BooleanField source="active" />
       <DateField source="created_at" />
+      <DateField source="published_at" />
     </Datagrid>
   </List>
 );
@@ -321,7 +322,11 @@ const BlogsCreate = () => (
     <SimpleForm toolbar={<Toolbar><SaveButton /></Toolbar>}>
       <TextInput source="title" required fullWidth />
       <TextInput source="slug" required fullWidth />
+      <TextInput source="category" fullWidth />
       <TextInput source="content" multiline fullWidth />
+      <TextInput source="excerpt" multiline fullWidth />
+      <LogoUploadInput source="og_image_url" label="OG Image" folder="blog/og" accept="image/png,image/jpeg,image/webp" buttonText="Upload OG Image" />
+      <DateInput source="published_at" />
       <BooleanInput source="active" />
     </SimpleForm>
   </Create>
@@ -332,7 +337,11 @@ const BlogsEdit = () => (
     <SimpleForm toolbar={<Toolbar><SaveButton /><DeleteButton mutationMode="pessimistic" /></Toolbar>}>
       <TextInput source="title" fullWidth />
       <TextInput source="slug" fullWidth />
+      <TextInput source="category" fullWidth />
       <TextInput source="content" multiline fullWidth />
+      <TextInput source="excerpt" multiline fullWidth />
+      <LogoUploadInput source="og_image_url" label="OG Image" folder="blog/og" accept="image/png,image/jpeg,image/webp" buttonText="Upload OG Image" />
+      <DateInput source="published_at" />
       <BooleanInput source="active" />
     </SimpleForm>
   </Edit>
@@ -349,7 +358,11 @@ const SettingsEdit = () => {
         <TextInput source="hero_video_poster_url" fullWidth />
         <TextInput source="background_theme_id" fullWidth />
         <TextInput source="background_gradient_css" multiline fullWidth />
-        <LogoUploadInput source="logo_url" />
+        <LogoUploadInput source="logo_url" label="Brand Logo" folder="site/logo" accept="image/png,image/jpeg,image/svg+xml" buttonText="Upload Logo" />
+        <TextInput source="default_title" fullWidth />
+        <TextInput source="default_description" multiline fullWidth />
+        <LogoUploadInput source="default_og_image_url" label="Default OG Image" folder="site/og" accept="image/png,image/jpeg,image/webp" buttonText="Upload Default OG" />
+        <SelectInput source="twitter_card_type" choices={[{ id: 'summary', name: 'summary' }, { id: 'summary_large_image', name: 'summary_large_image' }]} />
       </SimpleForm>
     </Edit>
   );
@@ -370,6 +383,7 @@ function App() {
       <Resource name="testimonials" icon={RateReviewIcon} list={TestimonialsList} create={TestimonialsCreate} edit={TestimonialsEdit} />
       <Resource name="faqs" icon={QuestionAnswerIcon} list={FaqsList} create={FaqsCreate} edit={FaqsEdit} />
       <Resource name="blogs" icon={ArticleIcon} list={BlogsList} create={BlogsCreate} edit={BlogsEdit} show={ShowGuesser} />
+      <Resource name="backlinks" icon={LinkIcon} list={BacklinksList} create={BacklinksCreate} edit={BacklinksEdit} />
       <Resource name="settings" icon={SettingsIcon} edit={SettingsEdit} />
       <CustomRoutes>
         <Route path="/settings" element={<Navigate to="/settings/default" replace />} />
@@ -383,3 +397,53 @@ function App() {
 }
 
 export default App;
+const BacklinksList = () => (
+  <List perPage={25} resource="backlinks" empty={<div style={{ padding: 16 }}>No records</div>}>
+    <Datagrid rowClick="edit">
+      <TextField source="site_name" />
+      <TextField source="url" />
+      <TextField source="status" />
+      <TextField source="contact_email" />
+      <DateField source="published_at" />
+      <DateField source="created_at" />
+    </Datagrid>
+  </List>
+);
+
+const BacklinksCreate = () => (
+  <Create>
+    <SimpleForm toolbar={<Toolbar><SaveButton /></Toolbar>}>
+      <TextInput source="site_name" required fullWidth />
+      <TextInput source="url" required fullWidth />
+      <SelectInput source="status" choices={[
+        { id: 'prospect', name: 'prospect' },
+        { id: 'contacted', name: 'contacted' },
+        { id: 'in_progress', name: 'in_progress' },
+        { id: 'published', name: 'published' },
+        { id: 'rejected', name: 'rejected' }
+      ]} />
+      <TextInput source="contact_email" fullWidth />
+      <TextInput source="notes" multiline fullWidth />
+      <DateInput source="published_at" />
+    </SimpleForm>
+  </Create>
+);
+
+const BacklinksEdit = () => (
+  <Edit>
+    <SimpleForm toolbar={<Toolbar><SaveButton /><DeleteButton mutationMode="pessimistic" /></Toolbar>}>
+      <TextInput source="site_name" fullWidth />
+      <TextInput source="url" fullWidth />
+      <SelectInput source="status" choices={[
+        { id: 'prospect', name: 'prospect' },
+        { id: 'contacted', name: 'contacted' },
+        { id: 'in_progress', name: 'in_progress' },
+        { id: 'published', name: 'published' },
+        { id: 'rejected', name: 'rejected' }
+      ]} />
+      <TextInput source="contact_email" fullWidth />
+      <TextInput source="notes" multiline fullWidth />
+      <DateInput source="published_at" />
+    </SimpleForm>
+  </Edit>
+);

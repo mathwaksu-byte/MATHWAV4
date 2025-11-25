@@ -10,6 +10,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   try {
     const testimonials = await prisma.testimonial.findMany({ where: { active: true }, orderBy: { created_at: 'desc' } });
+    res.set('Cache-Control', 'public, max-age=300');
     res.json({ testimonials });
   } catch (error) { next(error); }
 });

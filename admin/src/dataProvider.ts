@@ -49,6 +49,13 @@ const dataProvider: DataProvider = {
       const rows = (j.blogs || []).map((u: any) => ({ ...u, id: u.id })) as RaRecord[];
       return { data: rows, total: rows.length } as any;
     }
+    if (resource === 'backlinks') {
+      const res = await http('/backlinks/admin');
+      if (!res.ok) throw new Error('Failed');
+      const j = await res.json();
+      const rows = (j.backlinks || []).map((u: any) => ({ ...u, id: u.id })) as RaRecord[];
+      return { data: rows, total: rows.length } as any;
+    }
     if (resource === 'settings') {
       const res = await http('/settings/admin');
       if (!res.ok) throw new Error('Failed');
@@ -100,6 +107,14 @@ const dataProvider: DataProvider = {
       const u = j.blog;
       return { data: { ...u, id: u.id } as any } as any;
     }
+    if (resource === 'backlinks') {
+      const id = (params as any).id as string;
+      const res = await http(`/backlinks/admin/${id}`);
+      if (!res.ok) throw new Error('Not found');
+      const j = await res.json();
+      const u = j.backlink;
+      return { data: { ...u, id: u.id } as any } as any;
+    }
     if (resource === 'settings') {
       const res = await http('/settings/admin');
       if (!res.ok) throw new Error('Not found');
@@ -137,6 +152,13 @@ const dataProvider: DataProvider = {
       if (!res.ok) throw new Error('Failed');
       const j = await res.json();
       const u = j.blog;
+      return { data: { ...u, id: u.id } as any } as any;
+    }
+    if (resource === 'backlinks') {
+      const res = await http('/backlinks/admin', { method: 'POST', body });
+      if (!res.ok) throw new Error('Failed');
+      const j = await res.json();
+      const u = j.backlink;
       return { data: { ...u, id: u.id } as any } as any;
     }
     if (resource === 'settings') {
@@ -188,6 +210,13 @@ const dataProvider: DataProvider = {
       const u = j.blog;
       return { data: { ...u, id: u.id } as any } as any;
     }
+    if (resource === 'backlinks') {
+      const res = await http(`/backlinks/admin/${id}`, { method: 'PUT', body });
+      if (!res.ok) throw new Error('Failed');
+      const j = await res.json();
+      const u = j.backlink;
+      return { data: { ...u, id: u.id } as any } as any;
+    }
     if (resource === 'settings') {
       const res = await http('/settings/admin', { method: 'PUT', body });
       if (!res.ok) throw new Error('Failed');
@@ -221,6 +250,11 @@ const dataProvider: DataProvider = {
     }
     if (resource === 'blogs') {
       const res = await http(`/blogs/admin/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed');
+      return { data: ({ id } as any) } as any;
+    }
+    if (resource === 'backlinks') {
+      const res = await http(`/backlinks/admin/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed');
       return { data: ({ id } as any) } as any;
     }

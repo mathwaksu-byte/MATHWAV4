@@ -1,15 +1,23 @@
 import type { LinksFunction, MetaFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useLocation } from "@remix-run/react";
 import Layout from "./components/Layout";
 import { json } from "@remix-run/cloudflare";
 import styles from "./styles/tailwind.css?url";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
 
-export const meta: MetaFunction = () => [{ title: "KSU — MATHWA" }];
+export const meta: MetaFunction = () => [
+  { title: "MBBS in Kyrgyzstan — Official Admissions | MATHWA" },
+  { name: "description", content: "Official admissions partner for Kyrgyz State University — MBBS in Kyrgyzstan, fees, eligibility, visa support." },
+  { property: "og:title", content: "MBBS in Kyrgyzstan — Official Admissions | MATHWA" },
+  { property: "og:description", content: "Official admissions partner for Kyrgyz State University — MBBS in Kyrgyzstan, fees, eligibility, visa support." },
+  { property: "og:type", content: "website" },
+  { name: "twitter:card", content: "summary_large_image" }
+];
 
-export async function loader({ context }: LoaderFunctionArgs) {
+export async function loader({ context, request }: LoaderFunctionArgs) {
   const env = ((context as any)?.env) || {};
+  const origin = new URL(request.url).origin;
 
   // Fetch public site settings server-side to avoid client-side flicker
   let settings: any = {
@@ -32,6 +40,8 @@ export async function loader({ context }: LoaderFunctionArgs) {
       const envApi = typeof apiUrlRaw === 'string' && apiUrlRaw ? apiUrlRaw : undefined;
       const bases = [
         ...(envApi ? [envApi] : []),
+        "http://127.0.0.1:3002",
+        "http://localhost:3002",
         "http://127.0.0.1:3001",
         "http://localhost:3001",
         "http://127.0.0.1:8787"
@@ -55,14 +65,16 @@ export async function loader({ context }: LoaderFunctionArgs) {
     WHATSAPP_NUMBER: env.WHATSAPP_NUMBER || "",
     WHATSAPP_MESSAGE: env.WHATSAPP_MESSAGE || "",
     CALL_NUMBER: env.CALL_NUMBER || "",
-    settings
+    settings,
+    SITE_ORIGIN: origin
   }, {
-    headers: { "Cache-Control": "no-store" }
+    headers: { "Cache-Control": "public, max-age=60" }
   });
 }
 
 export default function App() {
   const env = useLoaderData<typeof loader>();
+  const location = useLocation();
   return (
     <html lang="en">
       <head>
@@ -70,9 +82,28 @@ export default function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <link rel="canonical" href={`${env.SITE_ORIGIN}${location.pathname}`} />
+        <meta property="og:site_name" content="MATHWA" />
+        <meta property="og:url" content={`${env.SITE_ORIGIN}${location.pathname}`} />
+        {env.settings?.hero_video_poster_url && (
+          <meta property="og:image" content={env.settings.hero_video_poster_url} />
+        )}
         {env.settings?.hero_video_poster_url && (
           <link rel="preload" as="image" href={env.settings.hero_video_poster_url} />
         )}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "EducationalOrganization",
+              "name": "MATHWA",
+              "url": env.SITE_ORIGIN,
+              "logo": env.settings?.logo_url || "",
+              "sameAs": []
+            })
+          }}
+        />
       </head>
       <body>
         <Layout siteSettings={env.settings}>

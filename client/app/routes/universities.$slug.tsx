@@ -30,6 +30,8 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
     const bases = [
       ...(envApi ? [envApi] : []),
       ...(envBase ? [envBase] : []),
+      'http://127.0.0.1:3002',
+      'http://localhost:3002',
       'http://127.0.0.1:3001',
       'http://localhost:3001',
       'http://127.0.0.1:8787',
@@ -51,9 +53,20 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   const u = data?.university;
+  const title = `${u?.name ?? 'University'} — MATHWA`;
+  const desc = `${u?.name ?? 'University'} — Official partner admissions via MATHWA`;
+  const img = u?.hero_image_url || u?.logo_url || "/uploads/universities/kyrgyz/logo.png";
   return [
-    { title: `${u?.name ?? 'University'} — MATHWA` },
-    { name: 'description', content: `${u?.name ?? 'University'} — Official partner admissions via MATHWA` },
+    { title },
+    { name: 'description', content: desc },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: desc },
+    { property: 'og:type', content: 'article' },
+    { property: 'og:image', content: img },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: desc },
+    { name: 'twitter:image', content: img }
   ];
 };
 
@@ -79,6 +92,20 @@ export default function UniversityPage() {
   }, [tab]);
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "/" },
+              { "@type": "ListItem", "position": 2, "name": "Universities", "item": "/universities" },
+              { "@type": "ListItem", "position": 3, "name": university.name, "item": `/universities/${university.slug}` }
+            ]
+          })
+        }}
+      />
       <div className="grid sm:grid-cols-2 gap-6 items-start">
         <div>
           <div className="w-full rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
@@ -217,6 +244,13 @@ export default function UniversityPage() {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="mt-10 flex flex-wrap gap-3">
+        <a href="/mbbs-kyrgyzstan" className="px-4 py-2 rounded-md bg-royalBlue text-white">MBBS Guide</a>
+        <a href="/mbbs-kyrgyzstan-fees" className="px-4 py-2 rounded-md bg-slate-800 text-white">Fees Guide</a>
+        <a href="/blog" className="px-4 py-2 rounded-md bg-blue-100 text-blue-700">Blog</a>
+        <a href="/faqs" className="px-4 py-2 rounded-md bg-blue-100 text-blue-700">FAQs</a>
       </div>
 
       {/* Sticky CTA */}

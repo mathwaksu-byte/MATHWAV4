@@ -21,7 +21,7 @@ export default function Navbar({ siteSettings: siteSettingsProp }: NavbarProps) 
   }, []);
 
   useEffect(() => {
-    if (!siteSettingsProp && fetcher.state === "idle" && !fetcher.data) {
+    if ((!siteSettingsProp || !siteSettingsProp.logo_url) && fetcher.state === "idle" && !fetcher.data) {
       fetcher.load("/api/settings/public");
     }
   }, [fetcher, siteSettingsProp]);
@@ -40,22 +40,22 @@ export default function Navbar({ siteSettings: siteSettingsProp }: NavbarProps) 
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14">
-          <Link to="/" className="flex items-center gap-2.5 flex-nowrap">
+        <div className="flex items-center justify-between min-h-14 py-1">
+          <Link to="/" className="flex items-center gap-1 sm:gap-2 flex-nowrap min-w-0">
             {siteSettings?.logo_url && logoOk ? (
               <img
                 src={siteSettings.logo_url}
                 alt="Brand logo"
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-contain bg-white p-0.5 border border-blue-200 ring-1 ring-blue-200 shadow-sm"
+                className="w-7 h-7 sm:w-9 sm:h-9 rounded-full object-contain bg-white p-0.5 border border-blue-200 ring-1 ring-blue-200 shadow-sm"
                 loading="eager"
                 decoding="async"
                 onError={() => setLogoOk(false)}
               />
             ) : (
-              <span className="inline-block w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-royalBlue to-blue-500 shadow-glow" />
+              <span className="inline-block w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-royalBlue to-blue-500 shadow-glow" />
             )}
-            <span className="font-semibold text-royalBlue tracking-tight">Kyrgyz State University</span>
-            <span className="ml-1 inline-flex items-center rounded-full bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 text-[10px] sm:text-xs whitespace-nowrap">
+            <span className="font-semibold text-royalBlue tracking-tight text-sm sm:text-base truncate max-w-[60vw] sm:max-w-none">Kyrgyz State University</span>
+            <span className="hidden sm:inline-flex sm:ml-1 items-center rounded-full bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 text-[10px] sm:text-xs whitespace-nowrap">
               — MATHWA (Official Partner)
             </span>
           </Link>
@@ -75,7 +75,7 @@ export default function Navbar({ siteSettings: siteSettingsProp }: NavbarProps) 
             }>Apply</NavLink>
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             <Link
               to="/apply"
               className="inline-flex items-center rounded-full bg-royalBlue text-white px-4 py-2 text-sm shadow-glow hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-royalBlue"

@@ -3,7 +3,7 @@ import { Title } from 'react-admin';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
 
 export const Dashboard = () => {
   const [stats, setStats] = useState({
