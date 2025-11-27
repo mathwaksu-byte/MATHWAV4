@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Grid, Typography, Button, Select, MenuItem, TextField } from '@mui/material';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { API_URL } from '../apiBase';
 
 type Fee = { year: number; tuition: number; hostel: number; misc: number; currency: string };
 
@@ -20,8 +19,13 @@ export default function FeesEditor() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
+  const authHeader = () => {
+    const t = localStorage.getItem('token');
+    return t ? { Authorization: `Bearer ${t}` } : {};
+  };
+
   useEffect(() => {
-    axios.get(`${API_URL}/universities`).then(r => {
+    axios.get(`${API_URL}/universities/admin/all`, { headers: authHeader() }).then(r => {
       const list = (r.data.universities || []) as any[];
       const options = list.map(u => ({ slug: u.slug, name: u.name }));
       setUniversities(options);
@@ -60,7 +64,7 @@ export default function FeesEditor() {
     setSaving(true);
     setMessage('');
     try {
-      const res = await axios.delete(`${API_URL}/universities/${slug}/fees`, { data: { year } });
+      const res = await axios.delete(`${API_URL}/universities/${slug}/fees`, { data: { year }, headers: authHeader() });
       const loaded: Fee[] = Array.isArray(res.data.fees) ? res.data.fees : [];
       loaded.sort((a, b) => a.year - b.year);
       setFees(loaded.map(f => ({ ...f, currency: f.currency || 'INR' })) as Fee[]);
@@ -77,7 +81,7 @@ export default function FeesEditor() {
     setSaving(true);
     setMessage('');
     try {
-      await axios.delete(`${API_URL}/universities/${slug}/fees`, { data: { all: true } });
+      await axios.delete(`${API_URL}/universities/${slug}/fees`, { data: { all: true }, headers: authHeader() });
       setFees([]);
       setMessage('Cleared all fees');
     } catch {
@@ -92,7 +96,7 @@ export default function FeesEditor() {
     setSaving(true);
     setMessage('');
     try {
-      await axios.post(`${API_URL}/universities/${slug}/fees`, { fees, replace: true });
+      await axios.post(`${API_URL}/universities/${slug}/fees`, { fees, replace: true }, { headers: authHeader() });
       setMessage('Fees saved');
     } catch {
       setMessage('Failed to save fees');

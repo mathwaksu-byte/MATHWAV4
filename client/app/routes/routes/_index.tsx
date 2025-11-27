@@ -10,8 +10,8 @@ import HeroVideo from '../components/HeroVideo';
 // BackgroundVariants removed per requirement: keep only Emerald Teal site-wide
 
 export const meta: MetaFunction = () => ([
-  { title: 'Kyrgyz State University — MATHWA Official Admissions' },
-  { name: 'description', content: 'Official admissions representation for Kyrgyz State University (Arabaev KSU) via MATHWA.' },
+  { title: 'Kyrgyz State University named after I. Arabaev — MATHWA Official Admissions' },
+  { name: 'description', content: 'Official admissions representation for Kyrgyz State University named after I. Arabaev (KSU) via MATHWA.' },
 ]);
 
 type FeaturedUniversity = {
@@ -27,7 +27,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
     const envBase = (context as any)?.env?.PUBLIC_SERVER_BASE_URL as string | undefined || (import.meta as any)?.env?.PUBLIC_SERVER_BASE_URL as string | undefined;
     const bases = [
       ...(envBase ? [envBase] : []),
-      'http://localhost:3001',
+      'http://localhost:3002',
       'http://localhost:4000',
       'http://localhost:4001'
     ];

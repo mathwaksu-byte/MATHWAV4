@@ -23,8 +23,7 @@ import axios from 'axios';
 const MyLayout = (props: any) => <Layout {...props} menu={MyMenu} />;
 
 import { List, Datagrid, TextField, BooleanField, DateField, NumberField, Create, Edit, SimpleForm, TextInput, BooleanInput, Toolbar, SaveButton, DeleteButton, SelectInput, ArrayInput, SimpleFormIterator, useInput, NumberInput, DateInput } from 'react-admin';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { API_URL } from './apiBase';
 
 const LogoUploadInput = ({ source, label = 'Brand Logo', folder = 'site/logo', accept = 'image/png,image/jpeg,image/svg+xml', buttonText = 'Upload Logo' }: any) => {
   const { field } = useInput({ source });

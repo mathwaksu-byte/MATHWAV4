@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = ((import.meta as any)?.env?.PUBLIC_SERVER_BASE_URL ? String((import.meta as any).env.PUBLIC_SERVER_BASE_URL).replace(/\/$/, '') + '/api' : 'http://localhost:3001/api');
+const API_URL = ((import.meta as any)?.env?.PUBLIC_SERVER_BASE_URL ? String((import.meta as any).env.PUBLIC_SERVER_BASE_URL).replace(/\/$/, '') + '/api' : 'http://localhost:3002/api');
 
 const api = axios.create({
   baseURL: API_URL,

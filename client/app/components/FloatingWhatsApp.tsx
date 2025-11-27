@@ -19,8 +19,7 @@ export default function FloatingWhatsApp() {
         transition={{ repeat: Infinity, duration: 2 }}
       >
         1
-      </motion.div
-    >
+      </motion.div>
     </motion.button>
   );
 }

@@ -54,7 +54,7 @@ export default function Navbar({ siteSettings: siteSettingsProp }: NavbarProps) 
             ) : (
               <span className="inline-block w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-royalBlue to-blue-500 shadow-glow" />
             )}
-            <span className="font-semibold text-royalBlue tracking-tight text-sm sm:text-base truncate max-w-[60vw] sm:max-w-none">Kyrgyz State University</span>
+            <span className="font-semibold text-royalBlue tracking-tight text-sm sm:text-base truncate max-w-[60vw] sm:max-w-none">Kyrgyz State University named after I. Arabaev</span>
             <span className="hidden sm:inline-flex sm:ml-1 items-center rounded-full bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 text-[10px] sm:text-xs whitespace-nowrap">
               — MATHWA (Official Partner)
             </span>

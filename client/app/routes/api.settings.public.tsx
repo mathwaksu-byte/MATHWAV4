@@ -14,8 +14,8 @@ export async function loader({ context }: LoaderFunctionArgs) {
       const envApi = typeof apiUrlRaw === 'string' && apiUrlRaw ? apiUrlRaw : undefined;
       const bases = [
         ...(envApi ? [envApi] : []),
-        "http://127.0.0.1:3001",
-        "http://localhost:3001",
+        "http://127.0.0.1:3002",
+        "http://localhost:3002",
         "http://127.0.0.1:8787"
       ];
       for (const b of bases) {

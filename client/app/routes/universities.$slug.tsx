@@ -32,8 +32,6 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
       ...(envBase ? [envBase] : []),
       'http://127.0.0.1:3002',
       'http://localhost:3002',
-      'http://127.0.0.1:3001',
-      'http://localhost:3001',
       'http://127.0.0.1:8787',
       'http://localhost:4000',
       'http://localhost:4001'
@@ -106,6 +104,18 @@ export default function UniversityPage() {
           })
         }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollegeOrUniversity",
+            "name": university.name,
+            "logo": university.logo_url || '',
+            "sameAs": isOfficialPartner ? ["https://arabaevksu.edu.kg/en/"] : [],
+          })
+        }}
+      />
       <div className="grid sm:grid-cols-2 gap-6 items-start">
         <div>
           <div className="w-full rounded-lg overflow-hidden" style={{ aspectRatio: '16/9' }}>
@@ -139,7 +149,7 @@ export default function UniversityPage() {
                 ) : (
                   <span className="inline-block h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-gradient-to-br from-royalBlue to-blue-500" />
                 )}
-                <span className="font-semibold">Kyrgyz State University — MATHWA</span>
+                <span className="font-semibold">Kyrgyz State University named after I. Arabaev — MATHWA</span>
               </a>
             </div>
           )}
@@ -246,20 +256,21 @@ export default function UniversityPage() {
         )}
       </div>
 
-      <div className="mt-10 flex flex-wrap gap-3">
-        <a href="/mbbs-kyrgyzstan" className="px-4 py-2 rounded-md bg-royalBlue text-white">MBBS Guide</a>
-        <a href="/mbbs-kyrgyzstan-fees" className="px-4 py-2 rounded-md bg-slate-800 text-white">Fees Guide</a>
-        <a href="/blog" className="px-4 py-2 rounded-md bg-blue-100 text-blue-700">Blog</a>
-        <a href="/faqs" className="px-4 py-2 rounded-md bg-blue-100 text-blue-700">FAQs</a>
+      <div className="mt-10 flex flex-wrap items-center gap-2 sm:gap-3">
+        <a href="/mbbs-kyrgyzstan" className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white text-royalBlue border border-blue-200 text-sm sm:text-base shadow-glow hover:bg-blue-50">MBBS Guide</a>
+        <a href="/mbbs-kyrgyzstan-fees" className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white text-royalBlue border border-blue-200 text-sm sm:text-base shadow-glow hover:bg-blue-50">Fees Guide</a>
+        <a href="/blog" className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white text-royalBlue border border-blue-200 text-sm sm:text-base shadow-glow hover:bg-blue-50">Blog</a>
+        <a href="/faqs" className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white text-royalBlue border border-blue-200 text-sm sm:text-base shadow-glow hover:bg-blue-50">FAQs</a>
       </div>
 
       {/* Sticky CTA */}
         <div className="fixed bottom-4 inset-x-0 flex justify-center pointer-events-none">
           <div className="pointer-events-auto glass rounded-full px-4 py-2 shadow-glow flex gap-2">
             <a href="/apply" className="px-4 py-2 rounded-full bg-blue-600 text-white">Start Application</a>
-            <a href="https://wa.me/" className="px-4 py-2 rounded-full bg-green-600 text-white">Chat</a>
+            <a href={getWhatsAppLink()} className="px-4 py-2 rounded-full bg-green-600 text-white">Chat</a>
           </div>
         </div>
     </div>
   );
 }
+import { getWhatsAppLink } from "../utils/whatsapp";

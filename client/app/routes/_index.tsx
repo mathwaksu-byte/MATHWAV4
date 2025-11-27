@@ -10,14 +10,14 @@ import HeroVideo from "../components/HeroVideo";
 
 export const meta: MetaFunction = () => ([
   { title: "MBBS in Kyrgyzstan — Official Admissions via MATHWA" },
-  { name: "description", content: "Apply for MBBS in Kyrgyzstan with MATHWA — Official partner of Kyrgyz State University. Fees, eligibility, visa support." },
+  { name: "description", content: "Apply for MBBS in Kyrgyzstan with MATHWA — Official partner of Kyrgyz State University named after I. Arabaev. Fees, eligibility, visa support." },
   { property: "og:title", content: "MBBS in Kyrgyzstan — Official Admissions via MATHWA" },
-  { property: "og:description", content: "Apply for MBBS in Kyrgyzstan with MATHWA — Official partner of Kyrgyz State University." },
+  { property: "og:description", content: "Apply for MBBS in Kyrgyzstan with MATHWA — Official partner of Kyrgyz State University named after I. Arabaev." },
   { property: "og:type", content: "website" },
   { property: "og:image", content: "/uploads/universities/kyrgyz/logo.png" },
   { name: "twitter:card", content: "summary_large_image" },
   { name: "twitter:title", content: "MBBS in Kyrgyzstan — Official Admissions via MATHWA" },
-  { name: "twitter:description", content: "Official partner admissions for Kyrgyz State University." },
+  { name: "twitter:description", content: "Official partner admissions for Kyrgyz State University named after I. Arabaev." },
   { name: "twitter:image", content: "/uploads/universities/kyrgyz/logo.png" }
 ]);
 
@@ -46,7 +46,7 @@ export async function loader({ context }: LoaderFunctionArgs) {
       const envApi = typeof apiUrlRaw === 'string' && apiUrlRaw ? apiUrlRaw : undefined;
       const bases = [
         ...(envApi ? [envApi] : []),
-        "http://127.0.0.1:3001",
+        "http://127.0.0.1:3002",
         "http://localhost:3002",
         "http://127.0.0.1:8787"
       ];
@@ -116,12 +116,6 @@ export default function Index() {
   const isLoading = navigation.state !== "idle";
   return (
     <div className="relative">
-      <div className="px-4 pt-2">
-        <div className="flex flex-wrap items-baseline gap-2">
-          <h1 className="text-lg sm:text-xl font-semibold leading-tight tracking-tight text-royalBlue">MBBS in Kyrgyzstan — Official Admissions via MATHWA</h1>
-          <span className="text-xs sm:text-sm text-slate-700">Government accredited programs, transparent fees, visa assistance, and student housing.</span>
-        </div>
-      </div>
       <div className="px-4">
         <HeroVideo
           srcMp4={settings?.hero_video_mp4_url || undefined}
@@ -133,6 +127,12 @@ export default function Index() {
           overlay="none"
           showPartnerBadge={false}
         />
+      </div>
+      <div className="px-4 mt-4">
+        <div className="flex flex-wrap items-baseline gap-2">
+          <h1 className="text-lg sm:text-xl font-semibold leading-tight tracking-tight text-royalBlue">MBBS in Kyrgyzstan — Official Admissions via MATHWA</h1>
+          <span className="text-xs sm:text-sm text-slate-700">Government accredited programs, transparent fees, visa assistance, and student housing.</span>
+        </div>
       </div>
       <section className="mt-8 px-4">
         <div className="max-w-5xl mx-auto">

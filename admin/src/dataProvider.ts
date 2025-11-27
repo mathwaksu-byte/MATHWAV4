@@ -1,12 +1,11 @@
 import type { DataProvider, RaRecord } from 'react-admin';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { API_URL } from './apiBase';
 
 async function http(path: string, init?: RequestInit) {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const token = localStorage.getItem('token');
   if (token) headers['Authorization'] = `Bearer ${token}`;
-  const res = await fetch(`${API}${path}`, { ...init, headers: { ...headers, ...(init?.headers as any) } });
+  const res = await fetch(`${API_URL}${path}`, { ...init, headers: { ...headers, ...(init?.headers as any) } });
   return res;
 }
 

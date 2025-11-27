@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Grid, Typography, Button, Card, CardHeader, CardContent, Select, MenuItem } from '@mui/material';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { API_URL } from '../apiBase';
 
 export default function DisplayPictures() {
   const [universities, setUniversities] = useState<Array<{ slug: string; name: string }>>([]);
@@ -14,6 +13,11 @@ export default function DisplayPictures() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [messageHero, setMessageHero] = useState('');
   const [messageLogo, setMessageLogo] = useState('');
+
+  const authHeader = () => {
+    const t = localStorage.getItem('token');
+    return t ? { Authorization: `Bearer ${t}` } : {};
+  };
 
   useEffect(() => {
     axios.get(`${API_URL}/universities`).then(r => {
@@ -39,7 +43,7 @@ export default function DisplayPictures() {
     try {
       const fd = new FormData();
       fd.append('file', heroFile);
-      const res = await axios.post(`${API_URL}/admin/universities/${slug}/dp?type=hero`, fd);
+      const res = await axios.post(`${API_URL}/admin/universities/${slug}/dp?type=hero`, fd, { headers: authHeader() });
       const u = res.data.university || {};
       setPreview({ hero: u.hero_image_url, logo: u.logo_url });
       setMessageHero('Hero updated');
@@ -58,7 +62,7 @@ export default function DisplayPictures() {
     try {
       const fd = new FormData();
       fd.append('file', logoFile);
-      const res = await axios.post(`${API_URL}/admin/universities/${slug}/dp?type=logo`, fd);
+      const res = await axios.post(`${API_URL}/admin/universities/${slug}/dp?type=logo`, fd, { headers: authHeader() });
       const u = res.data.university || {};
       setPreview({ hero: u.hero_image_url, logo: u.logo_url });
       setMessageLogo('Logo updated');
@@ -75,7 +79,7 @@ export default function DisplayPictures() {
     setUploadingHero(true);
     setMessageHero('');
     try {
-      const res = await axios.delete(`${API_URL}/admin/universities/${slug}/dp?type=hero`);
+      const res = await axios.delete(`${API_URL}/admin/universities/${slug}/dp?type=hero`, { headers: authHeader() });
       const u = res.data.university || {};
       setPreview({ hero: u.hero_image_url, logo: u.logo_url });
       setMessageHero('Cleared');
@@ -91,7 +95,7 @@ export default function DisplayPictures() {
     setUploadingLogo(true);
     setMessageLogo('');
     try {
-      const res = await axios.delete(`${API_URL}/admin/universities/${slug}/dp?type=logo`);
+      const res = await axios.delete(`${API_URL}/admin/universities/${slug}/dp?type=logo`, { headers: authHeader() });
       const u = res.data.university || {};
       setPreview({ hero: u.hero_image_url, logo: u.logo_url });
       setMessageLogo('Cleared');

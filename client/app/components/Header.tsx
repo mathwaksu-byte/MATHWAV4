@@ -7,6 +7,8 @@ import { openWhatsApp } from '../utils/whatsapp';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const env = (typeof window !== 'undefined' ? (window as any).ENV : {}) || {};
+  const callNumber = env.CALL_NUMBER || '+1234567890';
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -25,7 +27,7 @@ export default function Header() {
           <Link to="/" className="flex items-center space-x-2">
             <div className="text-2xl font-bold text-gradient">MATHWA</div>
             <div className="hidden sm:block text-xs text-gray-600 max-w-xs">
-              Official Partner - Kyrgyz State University
+              Official Partner - Kyrgyz State University named after I. Arabaev
             </div>
           </Link>
 
@@ -52,7 +54,7 @@ export default function Header() {
               <span>WhatsApp</span>
             </button>
             <a
-              href="tel:+1234567890"
+              href={`tel:${String(callNumber).replace(/[^+0-9]/g, '')}`}
               className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
             >
               <FaPhone className="text-lg" />
@@ -102,7 +104,7 @@ export default function Header() {
                   <span>WhatsApp Us</span>
                 </button>
                 <a
-                  href="tel:+1234567890"
+                  href={`tel:${String(callNumber).replace(/[^+0-9]/g, '')}`}
                   className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
                 >
                   <FaPhone className="text-lg" />

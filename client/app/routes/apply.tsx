@@ -2,12 +2,13 @@ import type { MetaFunction } from '@remix-run/react';
 import type { ActionFunctionArgs } from '@remix-run/cloudflare';
 import { Form, useActionData } from '@remix-run/react';
 import { useEffect, useMemo, useState } from 'react';
+import { getWhatsAppLink } from '../utils/whatsapp';
 
 type ActionData = { ok: boolean; message?: string } | undefined;
 
 export const meta: MetaFunction = () => ([
   { title: 'Apply — Official Admissions via MATHWA' },
-  { name: 'description', content: 'Submit your application for MBBS in Kyrgyzstan through MATHWA — Official Partner of Kyrgyz State University.' },
+  { name: 'description', content: 'Submit your application for MBBS in Kyrgyzstan through MATHWA — Official Partner of Kyrgyz State University named after I. Arabaev.' },
   { property: 'og:title', content: 'Apply — Official Admissions via MATHWA' },
   { property: 'og:description', content: 'Apply for MBBS in Kyrgyzstan with MATHWA.' },
   { property: 'og:type', content: 'website' },
@@ -24,8 +25,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const envApi = typeof apiUrlRaw === 'string' && apiUrlRaw ? apiUrlRaw : undefined;
   const bases = [
     ...(envApi ? [envApi] : []),
-    'http://127.0.0.1:3001',
-    'http://localhost:3001',
+    'http://127.0.0.1:3002',
+    'http://localhost:3002',
     'http://127.0.0.1:8787'
   ];
   const uploadMarksheet = async () => {
@@ -150,7 +151,7 @@ export default function Apply() {
         <div className="mt-4 p-4 rounded-md bg-green-50 text-green-700">
           Application submitted successfully! We will contact you via WhatsApp.
           <div className="mt-2">
-          <a href="https://wa.me/" className="px-3 py-2 rounded-md bg-green-600 text-white">WhatsApp Admissions</a>
+          <a href={getWhatsAppLink()} className="px-3 py-2 rounded-md bg-green-600 text-white">WhatsApp Admissions</a>
           </div>
         </div>
       )}
@@ -235,7 +236,7 @@ export default function Apply() {
             <div>
               <label className="text-sm text-slate-600" htmlFor="preferred_university_slug">Preferred University</label>
               <select id="preferred_university_slug" name="preferred_university_slug" className="mt-1 border rounded-md px-3 py-2 w-full">
-                <option value="kyrgyz-state-university">Kyrgyz State University (Arabaev University)</option>
+                <option value="kyrgyz-state-university">Kyrgyz State University named after I. Arabaev (KSU)</option>
               </select>
             </div>
             <div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getWhatsAppLink } from '../utils/whatsapp';
 
 export default function SmartPopup() {
   const [visible, setVisible] = useState(false);
@@ -17,9 +18,9 @@ export default function SmartPopup() {
   return (
     <div className="fixed bottom-6 right-6 glass p-4 rounded-lg shadow-glow">
       <div className="font-semibold">Official Admissions Desk</div>
-      <p className="text-sm text-slate-700 mt-1">Chat with the official admissions team representing I. Arabaev KSU.</p>
+      <p className="text-sm text-slate-700 mt-1">Chat with the official admissions team representing Kyrgyz State University named after I. Arabaev (KSU).</p>
       <div className="mt-3 flex gap-2">
-        <a href="https://wa.me/" className="px-3 py-2 rounded-md bg-green-600 text-white">WhatsApp</a>
+        <a href={getWhatsAppLink()} className="px-3 py-2 rounded-md bg-green-600 text-white">WhatsApp</a>
         <a href="/apply" className="px-3 py-2 rounded-md bg-royalBlue text-white">Apply (Official)</a>
       </div>
       <button className="absolute -top-2 -right-2 bg-slate-800 text-white rounded-full w-6 h-6" onClick={() => setVisible(false)}>×</button>

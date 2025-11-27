@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Box, Grid, Typography, Button, Select, MenuItem, ImageList, ImageListItem, ImageListItemBar, Divider } from '@mui/material';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import { API_URL } from '../apiBase';
 
 export default function GalleryManager() {
   const [universities, setUniversities] = useState<Array<{ slug: string; name: string }>>([]);
@@ -13,6 +12,11 @@ export default function GalleryManager() {
   const [selected, setSelected] = useState<Record<string, boolean>>({});
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
+
+  const authHeader = () => {
+    const t = localStorage.getItem('token');
+    return t ? { Authorization: `Bearer ${t}` } : {};
+  };
 
   useEffect(() => {
     axios.get(`${API_URL}/universities`).then(r => {
@@ -48,7 +52,7 @@ export default function GalleryManager() {
     try {
       const fd = new FormData();
       Array.from(files).forEach(f => fd.append('images', f));
-      const res = await axios.post(`${API_URL}/admin/universities/${slug}/gallery`, fd);
+      const res = await axios.post(`${API_URL}/admin/universities/${slug}/gallery`, fd, { headers: authHeader() });
       const u = res.data.university || {};
       const urls = Array.isArray(u.gallery_urls) ? u.gallery_urls : [];
       setPreview(urls);
@@ -72,7 +76,7 @@ export default function GalleryManager() {
     setUploading(true);
     setMessage('');
     try {
-      const res = await axios.delete(`${API_URL}/admin/universities/${slug}/gallery`, { data: { urls } });
+      const res = await axios.delete(`${API_URL}/admin/universities/${slug}/gallery`, { data: { urls }, headers: authHeader() });
       const u = res.data.university || {};
       const next = Array.isArray(u.gallery_urls) ? u.gallery_urls : [];
       setPreview(next);

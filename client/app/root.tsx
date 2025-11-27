@@ -40,10 +40,10 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
       const envApi = typeof apiUrlRaw === 'string' && apiUrlRaw ? apiUrlRaw : undefined;
       const bases = [
         ...(envApi ? [envApi] : []),
-        "http://127.0.0.1:3002",
-        "http://localhost:3002",
         "http://127.0.0.1:3001",
         "http://localhost:3001",
+        "http://127.0.0.1:3002",
+        "http://localhost:3002",
         "http://127.0.0.1:8787"
       ];
       for (const b of bases) {
@@ -82,9 +82,19 @@ export default function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        {env.settings?.logo_url && (
+          <link rel="icon" type="image/png" href={env.settings.logo_url} />
+        )}
+        {env.API_URL && (
+          <link rel="preconnect" href={env.API_URL} crossOrigin="" />
+        )}
+        {env.SUPABASE_URL && (
+          <link rel="preconnect" href={env.SUPABASE_URL} crossOrigin="" />
+        )}
         <link rel="canonical" href={`${env.SITE_ORIGIN}${location.pathname}`} />
         <meta property="og:site_name" content="MATHWA" />
         <meta property="og:url" content={`${env.SITE_ORIGIN}${location.pathname}`} />
+        <meta name="theme-color" content="#1b3b9c" />
         {env.settings?.hero_video_poster_url && (
           <meta property="og:image" content={env.settings.hero_video_poster_url} />
         )}
