@@ -113,7 +113,14 @@ async function migrateUniversities() {
 async function migrateSiteSettings() {
   const s = await prisma.siteSetting.findUnique({ where: { key: 'default' } })
   if (!s) return 0
-  const fields = ['hero_video_mp4_url', 'hero_video_webm_url', 'hero_video_poster_url']
+  const fields = [
+    'hero_video_mp4_url',
+    'hero_video_webm_url',
+    'hero_video_poster_url',
+    'hero_video_mobile_mp4_url',
+    'hero_video_mobile_webm_url',
+    'hero_video_mobile_poster_url'
+  ]
   const updates = {}
   for (const f of fields) {
     const url = s[f]

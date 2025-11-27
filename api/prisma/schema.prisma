@@ -107,6 +107,9 @@ model SiteSetting {
   hero_video_mp4_url      String?
   hero_video_webm_url     String?
   hero_video_poster_url   String?
+  hero_video_mobile_mp4_url      String?
+  hero_video_mobile_webm_url     String?
+  hero_video_mobile_poster_url   String?
   background_theme_id     String?
   background_gradient_css String?
   updated_at              DateTime @default(now())

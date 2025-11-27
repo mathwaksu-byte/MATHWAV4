@@ -87,6 +87,9 @@ export default function Index() {
           srcMp4={settings?.hero_video_mp4_url || undefined}
           srcWebm={settings?.hero_video_webm_url || undefined}
           poster={settings?.hero_video_poster_url || undefined}
+          mobileSrcMp4={settings?.hero_video_mobile_mp4_url || undefined}
+          mobileSrcWebm={settings?.hero_video_mobile_webm_url || undefined}
+          mobilePoster={settings?.hero_video_mobile_poster_url || undefined}
           title={settings?.hero_title}
           subtitle={settings?.hero_subtitle}
           showTitleSubtitle={false}

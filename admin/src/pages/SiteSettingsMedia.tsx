@@ -42,11 +42,20 @@ export default function SiteSettingsMedia() {
     });
   };
 
-  const removeVideo = async (videoType: 'mp4' | 'webm' | 'poster') => {
+  const removeVideo = async (videoType: 'mp4' | 'webm' | 'poster' | 'mobile_mp4' | 'mobile_webm' | 'mobile_poster') => {
     setLoading(true);
     setMessage(null);
     try {
-      const urlKey = videoType === 'poster' ? 'hero_video_poster_url' : `hero_video_${videoType}_url`;
+      const urlKey =
+        videoType === 'poster'
+          ? 'hero_video_poster_url'
+          : videoType === 'mobile_mp4'
+          ? 'hero_video_mobile_mp4_url'
+          : videoType === 'mobile_webm'
+          ? 'hero_video_mobile_webm_url'
+          : videoType === 'mobile_poster'
+          ? 'hero_video_mobile_poster_url'
+          : `hero_video_${videoType}_url`;
       const currentUrl = preview?.[urlKey];
       
       if (currentUrl) {
@@ -103,6 +112,9 @@ export default function SiteSettingsMedia() {
       const mp4 = fd.get('hero_video_mp4') as File | null;
       const webm = fd.get('hero_video_webm') as File | null;
       const poster = fd.get('hero_poster') as File | null;
+      const mobileMp4 = fd.get('hero_video_mobile_mp4') as File | null;
+      const mobileWebm = fd.get('hero_video_mobile_webm') as File | null;
+      const mobilePoster = fd.get('hero_video_mobile_poster') as File | null;
       const logo = fd.get('site_logo') as File | null;
       const updates: any = { hero_title: title, hero_subtitle: subtitle };
       if (mp4 && mp4.size) {
@@ -113,6 +125,15 @@ export default function SiteSettingsMedia() {
       }
       if (poster && poster.size) {
         updates.hero_video_poster_url = await uploadFile(poster);
+      }
+      if (mobileMp4 && mobileMp4.size) {
+        updates.hero_video_mobile_mp4_url = await uploadFile(mobileMp4, 'site/hero/mobile');
+      }
+      if (mobileWebm && mobileWebm.size) {
+        updates.hero_video_mobile_webm_url = await uploadFile(mobileWebm, 'site/hero/mobile');
+      }
+      if (mobilePoster && mobilePoster.size) {
+        updates.hero_video_mobile_poster_url = await uploadFile(mobilePoster, 'site/hero/mobile');
       }
       if (logo && logo.size) {
         updates.logo_url = await uploadFile(logo, 'site/logo');
@@ -192,6 +213,21 @@ export default function SiteSettingsMedia() {
           </label>
         </div>
 
+        <div style={{ marginTop: 24, padding: 16, backgroundColor: '#f8fafc', borderRadius: 8 }}>
+          <h3 style={{ marginBottom: 12 }}>Mobile Hero Video</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <label>Mobile MP4
+              <input type="file" name="hero_video_mobile_mp4" accept="video/mp4" />
+            </label>
+            <label>Mobile WEBM
+              <input type="file" name="hero_video_mobile_webm" accept="video/webm" />
+            </label>
+            <label>Mobile Poster
+              <input type="file" name="hero_video_mobile_poster" accept="image/png,image/jpeg,image/webp" />
+            </label>
+          </div>
+        </div>
+
         {preview && (
           <div style={{ marginTop: 16 }}>
             <h4>Current Files:</h4>
@@ -235,7 +271,46 @@ export default function SiteSettingsMedia() {
                   </button>
                 </div>
               )}
-              {!preview.hero_video_mp4_url && !preview.hero_video_webm_url && !preview.hero_video_poster_url && (
+              {preview.hero_video_mobile_mp4_url && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 8, backgroundColor: '#f8fafc', borderRadius: 6 }}>
+                  <span style={{ fontSize: 14 }}>Mobile MP4: {preview.hero_video_mobile_mp4_url.split('/').pop()}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => removeVideo('mobile_mp4')}
+                    disabled={loading}
+                    style={{ padding: '4px 8px', fontSize: 12, backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+              {preview.hero_video_mobile_webm_url && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 8, backgroundColor: '#f8fafc', borderRadius: 6 }}>
+                  <span style={{ fontSize: 14 }}>Mobile WEBM: {preview.hero_video_mobile_webm_url.split('/').pop()}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => removeVideo('mobile_webm')}
+                    disabled={loading}
+                    style={{ padding: '4px 8px', fontSize: 12, backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+              {preview.hero_video_mobile_poster_url && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 8, backgroundColor: '#f8fafc', borderRadius: 6 }}>
+                  <span style={{ fontSize: 14 }}>Mobile Poster: {preview.hero_video_mobile_poster_url.split('/').pop()}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => removeVideo('mobile_poster')}
+                    disabled={loading}
+                    style={{ padding: '4px 8px', fontSize: 12, backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+              {!preview.hero_video_mp4_url && !preview.hero_video_webm_url && !preview.hero_video_poster_url && !preview.hero_video_mobile_mp4_url && !preview.hero_video_mobile_webm_url && !preview.hero_video_mobile_poster_url && (
                 <span style={{ fontSize: 14, color: '#64748b' }}>No files uploaded yet</span>
               )}
             </div>

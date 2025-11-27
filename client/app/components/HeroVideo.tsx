@@ -5,6 +5,9 @@ type Props = {
   srcMp4?: string;
   srcWebm?: string;
   poster?: string;
+  mobileSrcMp4?: string;
+  mobileSrcWebm?: string;
+  mobilePoster?: string;
   title?: string;
   subtitle?: string;
   // Whether to show title/subtitle overlay text over the video
@@ -27,6 +30,9 @@ export default function HeroVideo({
   srcMp4,
   srcWebm,
   poster,
+  mobileSrcMp4,
+  mobileSrcWebm,
+  mobilePoster,
   title = "Study MBBS Abroad with Confidence",
   subtitle = "Transparent fees, visa assistance, and housing with official partners.",
   showTitleSubtitle = false,
@@ -43,9 +49,21 @@ export default function HeroVideo({
   const [badgeLogoError, setBadgeLogoError] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [ready, setReady] = useState(false);
-  const hasVideo = Boolean(srcMp4 || srcWebm);
-  const hasPoster = Boolean(poster);
+  const [isMobile, setIsMobile] = useState(false);
+  const activeMp4 = isMobile ? (mobileSrcMp4 || srcMp4) : srcMp4;
+  const activeWebm = isMobile ? (mobileSrcWebm || srcWebm) : srcWebm;
+  const activePoster = isMobile ? (mobilePoster || poster) : poster;
+  const hasVideo = Boolean(activeMp4 || activeWebm);
+  const hasPoster = Boolean(activePoster);
   const [format, setFormat] = useState<'webm' | 'mp4' | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia?.('(max-width: 640px)');
+    const update = () => setIsMobile(!!mq && mq.matches);
+    update();
+    mq?.addEventListener?.('change', update);
+    return () => mq?.removeEventListener?.('change', update);
+  }, []);
 
   useEffect(() => {
     const video = ref.current;
@@ -75,14 +93,13 @@ export default function HeroVideo({
   }, [hasVideo]);
 
   useEffect(() => {
-    // Choose a single playable format to avoid aborted requests
     const tester = document.createElement('video');
     const canWebm = !!tester.canPlayType && tester.canPlayType('video/webm') !== '';
     const canMp4 = !!tester.canPlayType && tester.canPlayType('video/mp4') !== '';
-    if (srcWebm && canWebm) setFormat('webm');
-    else if (srcMp4 && canMp4) setFormat('mp4');
+    if (activeWebm && canWebm) setFormat('webm');
+    else if (activeMp4 && canMp4) setFormat('mp4');
     else setFormat(null);
-  }, [srcWebm, srcMp4]);
+  }, [activeWebm, activeMp4]);
 
   return (
     <section className="relative min-h-[65vh] rounded-2xl overflow-hidden">
@@ -95,21 +112,21 @@ export default function HeroVideo({
           playsInline
           autoPlay
           preload="none"
-          poster={poster}
+          poster={activePoster}
           aria-label="Hero background video preview"
           onLoadedData={() => setReady(true)}
         >
-          {shouldLoad && format === 'webm' && srcWebm && (
-            <source src={srcWebm} type="video/webm" />
+          {shouldLoad && format === 'webm' && activeWebm && (
+            <source src={activeWebm} type="video/webm" />
           )}
-          {shouldLoad && format === 'mp4' && srcMp4 && (
-            <source src={srcMp4} type="video/mp4" />
+          {shouldLoad && format === 'mp4' && activeMp4 && (
+            <source src={activeMp4} type="video/mp4" />
           )}
         </video>
       ) : (
         <div
           className="absolute inset-0 w-full h-full"
-          style={hasPoster ? { backgroundImage: `url(${poster})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+          style={hasPoster ? { backgroundImage: `url(${activePoster})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
         >
           {!hasPoster && (
             <div className="w-full h-full bg-gradient-to-br from-royalBlue/20 via-blue-200/30 to-white" />
