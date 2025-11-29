@@ -47,24 +47,28 @@ export default function HeroVideo({
 }: Props) {
   const ref = useRef<HTMLVideoElement | null>(null);
   const [badgeLogoError, setBadgeLogoError] = useState(false);
-  const [shouldLoad, setShouldLoad] = useState(false);
-  const [ready, setReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const activeMp4 = isMobile ? (mobileSrcMp4 || srcMp4) : srcMp4;
-  const activeWebm = isMobile ? (mobileSrcWebm || srcWebm) : srcWebm;
-  const activePoster = isMobile ? (mobilePoster || poster) : poster;
-  const hasVideo = Boolean(activeMp4 || activeWebm);
-  const hasPoster = Boolean(activePoster);
-  const [format, setFormat] = useState<'webm' | 'mp4' | null>(null);
-
+  
+  // We remove the IntersectionObserver and lazy loading state for the Hero video
+  // because it is above the fold and should load immediately.
+  
   useEffect(() => {
-    const mq = window.matchMedia?.('(max-width: 640px)');
-    const update = () => setIsMobile(!!mq && mq.matches);
-    update();
-    mq?.addEventListener?.('change', update);
-    return () => mq?.removeEventListener?.('change', update);
+    const detectMobile = () => {
+      const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
+      const mq = window.matchMedia?.('(max-width: 640px)')?.matches || false;
+      return mq || w <= 640;
+    };
+    setIsMobile(detectMobile());
+    const handler = () => setIsMobile(detectMobile());
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
   }, []);
 
+  const activePoster = isMobile ? (mobilePoster || poster) : poster;
+  const hasVideo = Boolean(srcMp4 || srcWebm || mobileSrcMp4 || mobileSrcWebm);
+  const hasPoster = Boolean(activePoster);
+
+  // Simple effect to handle reduced motion
   useEffect(() => {
     const video = ref.current;
     if (!video || !hasVideo) return;
@@ -72,34 +76,19 @@ export default function HeroVideo({
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       video.pause();
-      return;
+    } else {
+      // Ensure it plays if not reduced motion
+      video.play().catch(() => {});
     }
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            setShouldLoad(true);
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-        });
-      },
-      { threshold: 0.25 }
-    );
-    io.observe(video);
-    return () => io.disconnect();
   }, [hasVideo]);
 
+  // Reload video when sources change
   useEffect(() => {
-    const tester = document.createElement('video');
-    const canWebm = !!tester.canPlayType && tester.canPlayType('video/webm') !== '';
-    const canMp4 = !!tester.canPlayType && tester.canPlayType('video/mp4') !== '';
-    if (activeWebm && canWebm) setFormat('webm');
-    else if (activeMp4 && canMp4) setFormat('mp4');
-    else setFormat(null);
-  }, [activeWebm, activeMp4]);
+    const video = ref.current;
+    if (!video) return;
+    video.load();
+    video.play().catch(() => {});
+  }, [srcMp4, srcWebm, mobileSrcMp4, mobileSrcWebm]);
 
   return (
     <section className="relative min-h-[65vh] rounded-2xl overflow-hidden">
@@ -111,16 +100,24 @@ export default function HeroVideo({
           loop
           playsInline
           autoPlay
-          preload="none"
+          preload="auto"
           poster={activePoster}
           aria-label="Hero background video preview"
-          onLoadedData={() => setReady(true)}
         >
-          {shouldLoad && format === 'webm' && activeWebm && (
-            <source src={activeWebm} type="video/webm" />
+          {/* Mobile Sources - standard breakpoint max-width: 767px */}
+          {mobileSrcWebm && (
+            <source src={mobileSrcWebm} type="video/webm" media="(max-width: 767px)" />
           )}
-          {shouldLoad && format === 'mp4' && activeMp4 && (
-            <source src={activeMp4} type="video/mp4" />
+          {mobileSrcMp4 && (
+            <source src={mobileSrcMp4} type="video/mp4" media="(max-width: 767px)" />
+          )}
+          
+          {/* Desktop Sources */}
+          {srcWebm && (
+            <source src={srcWebm} type="video/webm" />
+          )}
+          {srcMp4 && (
+            <source src={srcMp4} type="video/mp4" />
           )}
         </video>
       ) : (
@@ -142,9 +139,6 @@ export default function HeroVideo({
             : 'bg-gradient-to-t from-black/20 via-black/10 to-transparent'
         }`}
       >
-        {hasVideo && !ready && (
-          <div className="absolute top-3 right-3 text-xs bg-white/80 px-2 py-1 rounded-full border border-slate-200">Loading…</div>
-        )}
         {showPartnerBadge && (
           <div className="absolute top-3 left-3">
             <a

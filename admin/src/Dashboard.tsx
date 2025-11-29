@@ -2,8 +2,7 @@ import { Card, CardContent, CardHeader } from '@mui/material';
 import { Title } from 'react-admin';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002/api';
+import { API_URL } from './apiBase';
 
 export const Dashboard = () => {
   const [stats, setStats] = useState({

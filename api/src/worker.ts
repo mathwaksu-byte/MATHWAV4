@@ -61,7 +61,12 @@ app.get('/api/settings/public', c => {
       hero_subtitle: "Transparent fees, visa assistance, and student housing.",
       hero_video_mp4_url: "",
       hero_video_webm_url: "",
-      hero_video_poster_url: ""
+      hero_video_poster_url: "",
+      hero_video_mobile_mp4_url: "",
+      hero_video_mobile_webm_url: "",
+      hero_video_mobile_poster_url: "",
+      whatsapp_number: "",
+      call_number: ""
     }
   });
 })
@@ -73,7 +78,12 @@ app.get('/settings/public', c => {
       hero_subtitle: "Transparent fees, visa assistance, and student housing.",
       hero_video_mp4_url: "",
       hero_video_webm_url: "",
-      hero_video_poster_url: ""
+      hero_video_poster_url: "",
+      hero_video_mobile_mp4_url: "",
+      hero_video_mobile_webm_url: "",
+      hero_video_mobile_poster_url: "",
+      whatsapp_number: "",
+      call_number: ""
     }
   });
 })

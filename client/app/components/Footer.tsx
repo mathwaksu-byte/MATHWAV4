@@ -6,7 +6,7 @@ type FooterProps = {
 
 export default function Footer({ siteSettings }: FooterProps) {
   const env = (typeof window !== 'undefined' ? (window as any).ENV : {}) || {};
-  const callNumber = env.CALL_NUMBER || '+1 (555) 000‑0000';
+  const callNumber = siteSettings?.call_number || env.CALL_NUMBER || '+1 (555) 000‑0000';
   return (
     <footer className="mt-24 border-t border-slate-200 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -30,6 +30,11 @@ export default function Footer({ siteSettings }: FooterProps) {
               </span>
             </div>
             <p className="text-sm text-slate-600">Official admissions representation for Kyrgyz State University named after I. Arabaev (KSU) by MATHWA. Direct, transparent admissions—no consultancy.</p>
+            <div className="mt-3 text-xs text-slate-500">
+              <strong>University Address:</strong><br />
+              51 Razzakov Str, Bishkek, 720026<br />
+              Kyrgyz Republic
+            </div>
           </div>
           <div>
             <h4 className="font-medium mb-3">Explore</h4>

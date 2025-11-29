@@ -35,7 +35,7 @@ app.use('/*', cors({
       .filter(Boolean);
     const allowed = new Set([...baseAllowed, ...extra]);
     if (!origin) return baseAllowed[0] || 'http://localhost:3001';
-    return allowed.has(origin) ? origin : undefined;
+    return origin || baseAllowed[0] || 'http://localhost:3001';
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
@@ -246,6 +246,23 @@ app.post('/api/uploads/single', async c => {
   return c.json({ file: { url: puh.publicUrl } });
 });
 
+app.delete('/api/uploads', async c => {
+  try {
+    const env = c.env;
+    const body = await c.req.json();
+    const bucket = String(body.bucket || 'uploads');
+    const path = String(body.path || '');
+    if (!path) return c.json({ error: 'Path required' }, 400);
+    if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_KEY) return c.json({ error: 'Missing Supabase config' }, 500);
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
+    const { error } = await supabase.storage.from(bucket).remove([path]);
+    if (error) return c.json({ error: error.message }, 500);
+    return c.json({ ok: true });
+  } catch (e) {
+    return c.json({ error: 'Failed to delete' }, 500);
+  }
+});
+
 // Admin: Get all universities (including inactive)
 app.get('/api/universities/admin/all', async c => {
   try {
@@ -422,6 +439,38 @@ app.delete('/api/applications/admin/:id', async c => {
     }
 
     return c.json({ message: 'Application deleted successfully' });
+  } catch (_) {
+    return c.json({ error: 'Internal server error' }, 500);
+  }
+});
+
+app.patch('/api/applications/admin/:id/status', async c => {
+  try {
+    const authHeader = c.req.header('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'No token provided' }, 401);
+    }
+    const token = authHeader.substring(7);
+    try {
+      jwt.verify(token, c.env['JWT_SECRET'] || 'fallback-secret');
+    } catch (_) {
+      return c.json({ error: 'Invalid token' }, 401);
+    }
+    const id = c.req.param('id');
+    const body = await c.req.json();
+    const status = String(body.status || 'pending');
+    const notes = body.notes ? String(body.notes) : '';
+    const supabase = getSupabaseAdmin(c.env);
+    const { data: application, error } = await supabase
+      .from('Lead')
+      .update({ status, notes })
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (error) {
+      return c.json({ error: 'Failed to update status' }, 500);
+    }
+    return c.json({ application });
   } catch (_) {
     return c.json({ error: 'Internal server error' }, 500);
   }
@@ -632,7 +681,36 @@ app.get('/api/settings/admin', async c => {
     
     return c.json({ settings });
   } catch (error) {
-    console.error('Error in admin universities endpoint:', error);
+    console.error('Error in admin settings endpoint:', error);
+    return c.json({ error: 'Invalid token' }, 401);
+  }
+});
+
+app.put('/api/settings/admin', async c => {
+  try {
+    const authHeader = c.req.header('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'No token provided' }, 401);
+    }
+    const token = authHeader.substring(7);
+    try {
+      jwt.verify(token, c.env['JWT_SECRET'] || 'fallback-secret');
+    } catch (_) {
+      return c.json({ error: 'Invalid token' }, 401);
+    }
+    const body = await c.req.json();
+    const supabase = getSupabaseAdmin(c.env);
+    const { data: updated, error } = await supabase
+      .from('SiteSetting')
+      .update(body)
+      .eq('key', 'default')
+      .select('*')
+      .single();
+    if (error) {
+      return c.json({ error: 'Failed to update settings' }, 500);
+    }
+    return c.json({ settings: updated });
+  } catch (_) {
     return c.json({ error: 'Internal server error' }, 500);
   }
 });

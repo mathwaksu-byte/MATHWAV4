@@ -118,4 +118,6 @@ model SiteSetting {
   default_description     String?
   default_og_image_url    String?
   twitter_card_type       String?
+  whatsapp_number         String?
+  call_number             String?
 }

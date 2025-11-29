@@ -40,11 +40,15 @@ router.put(
     body('default_description').optional().trim(),
     body('default_og_image_url').optional().trim(),
     body('twitter_card_type').optional().trim(),
+    body('whatsapp_number').optional().trim(),
+    body('call_number').optional().trim(),
     validate
   ],
   async (req, res, next) => {
     try {
-      const data = { ...req.body, updated_at: new Date() };
+      // Remove id and key from body to avoid Prisma errors
+      const { id, key, updated_at, ...rest } = req.body;
+      const data = { ...rest, updated_at: new Date() };
       const settings = await prisma.siteSetting.upsert({
         where: { key: 'default' },
         update: data,

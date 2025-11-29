@@ -23,6 +23,29 @@ export default function GuideKyrgyzstan() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-royalBlue">MBBS in Kyrgyzstan — Complete Guide</h1>
       <p className="mt-2 text-slate-700">Key information for Indian students on fees, eligibility, NEET/NMC/FMGE, visa process, hostel and living costs.</p>
+      
+      <section className="mt-6 mb-8 p-5 bg-blue-50 rounded-xl border border-blue-100">
+        <h2 className="text-xl font-bold text-royalBlue mb-3">Why Study at Kyrgyz State University named after I. Arabaev?</h2>
+        <ul className="space-y-2 text-sm text-slate-700">
+          <li className="flex items-start gap-2">
+            <span className="text-royalBlue font-bold">✓</span>
+            <span><strong>80 Years of Legacy (1945-2025):</strong> One of the oldest and most respected government universities in Kyrgyzstan.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-royalBlue font-bold">✓</span>
+            <span><strong>Government Accredited:</strong> Recognized by the Ministry of Education, WHO, and compliant with NMC (India) guidelines.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-royalBlue font-bold">✓</span>
+            <span><strong>Award Winning:</strong> Recipient of the state "Dank" Order and international quality awards.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-royalBlue font-bold">✓</span>
+            <span><strong>Global Network:</strong> Agreements with 90+ international universities, offering student mobility and exchange programs.</span>
+          </li>
+        </ul>
+      </section>
+
       <section className="mt-6 space-y-4">
         <h2 className="text-2xl font-semibold">Fees Overview</h2>
         <p className="text-slate-700">Typical annual tuition ranges and total program costs vary by university. Refer to individual university pages for precise breakdowns.</p>
@@ -90,7 +113,7 @@ export default function GuideKyrgyzstan() {
           </div>
         </div>
         <div className="mt-6 flex flex-wrap gap-3">
-          <a href="/universities" className="px-4 py-2 rounded-md bg-royalBlue text-white">Explore Universities</a>
+          <a href="/universities" className="px-4 py-2 rounded-md bg-royalBlue text-white">Explore University</a>
           <a href="/apply" className="px-4 py-2 rounded-md bg-slate-800 text-white">Apply Now</a>
           <a href="/faqs" className="px-4 py-2 rounded-md bg-blue-100 text-blue-700">See FAQs</a>
         </div>

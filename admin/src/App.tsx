@@ -166,8 +166,17 @@ const UniversitiesList = () => (
 );
 
 const ApplicationsList = () => (
-  <List perPage={25} resource="applications" empty={<div style={{ padding: 16 }}>No records</div>}>
-    <Datagrid rowClick="show">
+  <List 
+    perPage={25} 
+    resource="applications" 
+    empty={<div style={{ padding: 16 }}>No records</div>}
+    queryOptions={{
+      refetchInterval: false,
+      staleTime: 0,
+      cacheTime: 0
+    }}
+  >
+    <Datagrid rowClick="show" bulkActionButtons={false}>
       <TextField source="name" />
       <TextField source="email" />
       <TextField source="phone" />
@@ -176,6 +185,7 @@ const ApplicationsList = () => (
       <NumberField source="preferred_year" />
       <TextField source="status" />
       <DateField source="created_at" />
+      <DeleteButton mutationMode="pessimistic" />
     </Datagrid>
   </List>
 );
@@ -263,7 +273,7 @@ const UniversitiesEdit = () => (
 );
 
 const ApplicationsEdit = () => (
-  <Edit>
+  <Edit mutationMode="pessimistic">
     <SimpleForm toolbar={<Toolbar><SaveButton /><DeleteButton mutationMode="pessimistic" /></Toolbar>}>
       <SelectInput source="status" choices={[
         { id: 'pending', name: 'pending' },
@@ -355,6 +365,9 @@ const SettingsEdit = () => {
         <TextInput source="hero_video_mp4_url" fullWidth />
         <TextInput source="hero_video_webm_url" fullWidth />
         <TextInput source="hero_video_poster_url" fullWidth />
+        <TextInput source="hero_video_mobile_mp4_url" fullWidth />
+        <TextInput source="hero_video_mobile_webm_url" fullWidth />
+        <TextInput source="hero_video_mobile_poster_url" fullWidth />
         <TextInput source="background_theme_id" fullWidth />
         <TextInput source="background_gradient_css" multiline fullWidth />
         <LogoUploadInput source="logo_url" label="Brand Logo" folder="site/logo" accept="image/png,image/jpeg,image/svg+xml" buttonText="Upload Logo" />
@@ -362,6 +375,8 @@ const SettingsEdit = () => {
         <TextInput source="default_description" multiline fullWidth />
         <LogoUploadInput source="default_og_image_url" label="Default OG Image" folder="site/og" accept="image/png,image/jpeg,image/webp" buttonText="Upload Default OG" />
         <SelectInput source="twitter_card_type" choices={[{ id: 'summary', name: 'summary' }, { id: 'summary_large_image', name: 'summary_large_image' }]} />
+        <TextInput source="whatsapp_number" fullWidth helperText="Format: +919999999999" />
+        <TextInput source="call_number" fullWidth helperText="Format: +919999999999" />
       </SimpleForm>
     </Edit>
   );

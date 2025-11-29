@@ -20,11 +20,21 @@ const dataProvider: DataProvider = {
       return { data: rows, total: rows.length } as any;
     }
     if (resource === 'applications') {
+      console.log(`Fetching applications page ${page} with limit ${perPage}`);
       const res = await http(`/applications/admin?page=${page}&limit=${perPage}`);
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to fetch applications: ${errorText}`);
+      }
       const j = await res.json();
-      const rows = (j.applications || []).map((u: any) => ({ ...u, id: u.id })) as RaRecord[];
+      console.log('Applications response:', j);
+      if (!j.applications || !Array.isArray(j.applications)) {
+        console.warn('Invalid applications response:', j);
+        return { data: [], total: 0 } as any;
+      }
+      const rows = j.applications.map((u: any) => ({ ...u, id: u.id })) as RaRecord[];
       const total = j.pagination?.total || rows.length;
+      console.log(`Returning ${rows.length} applications out of ${total} total`);
       return { data: rows, total } as any;
     }
     if (resource === 'testimonials') {
@@ -227,35 +237,39 @@ const dataProvider: DataProvider = {
   },
   delete: async (resource, params) => {
     const id = (params as any).id as string;
-    if (resource === 'universities') {
-      const res = await http(`/universities/admin/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
+    
+    const deleteResource = async (endpoint: string) => {
+      console.log(`Deleting ${resource} with ID: ${id}`);
+      const res = await http(endpoint, { method: 'DELETE' });
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error(`Delete failed for ${resource} ${id}:`, errorText);
+        throw new Error(`Delete failed: ${errorText}`);
+      }
+      console.log(`Successfully deleted ${resource} ${id}, waiting for backend to commit...`);
+      // Add a small delay to ensure backend has committed the deletion
+      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log(`Delete operation completed for ${resource} ${id}`);
       return { data: ({ id } as any) } as any;
+    };
+    
+    if (resource === 'universities') {
+      return deleteResource(`/universities/admin/${id}`);
     }
     if (resource === 'applications') {
-      const res = await http(`/applications/admin/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
-      return { data: ({ id } as any) } as any;
+      return deleteResource(`/applications/admin/${id}`);
     }
     if (resource === 'testimonials') {
-      const res = await http(`/testimonials/admin/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
-      return { data: ({ id } as any) } as any;
+      return deleteResource(`/testimonials/admin/${id}`);
     }
     if (resource === 'faqs') {
-      const res = await http(`/faqs/admin/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
-      return { data: ({ id } as any) } as any;
+      return deleteResource(`/faqs/admin/${id}`);
     }
     if (resource === 'blogs') {
-      const res = await http(`/blogs/admin/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
-      return { data: ({ id } as any) } as any;
+      return deleteResource(`/blogs/admin/${id}`);
     }
     if (resource === 'backlinks') {
-      const res = await http(`/backlinks/admin/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed');
-      return { data: ({ id } as any) } as any;
+      return deleteResource(`/backlinks/admin/${id}`);
     }
     throw new Error('Not supported');
   },
