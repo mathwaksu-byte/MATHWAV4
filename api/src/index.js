@@ -27,7 +27,7 @@ dotenv.config();
 dotenv.config({ path: '.dev.vars' });
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 // Security middleware
 app.use(helmet({
@@ -41,7 +41,8 @@ app.use(cors({
   origin: [
     process.env.CLIENT_URL || 'http://localhost:3000',
     'http://localhost:5173',
-    process.env.ADMIN_URL || 'http://localhost:3002',
+    'http://localhost:3003',
+    process.env.ADMIN_URL || 'http://localhost:3003',
     ...extraAdmins
   ],
   credentials: true

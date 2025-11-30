@@ -32,9 +32,9 @@ export async function loader({ params, context }: LoaderFunctionArgs) {
       ...(envBase ? [envBase] : []),
       'http://127.0.0.1:3002',
       'http://localhost:3002',
+      'http://127.0.0.1:3001',
+      'http://localhost:3001',
       'http://127.0.0.1:8787',
-      'http://localhost:4000',
-      'http://localhost:4001'
     ];
     for (const b of bases) {
       res = await fetch(`${b}/api/universities/${slug}`).catch(() => null as any);
